@@ -174,4 +174,178 @@ class L10nTr extends L10n {
 
   @override
   String get loading => 'Yükleniyor…';
+
+  @override
+  String get week => 'Hafta';
+
+  @override
+  String get day => 'Gün';
+
+  @override
+  String get repeat => 'Tekrar';
+
+  @override
+  String get noRepeat => 'Tekrarlama';
+
+  @override
+  String get daily => 'Her gün';
+
+  @override
+  String get weekly => 'Her hafta';
+
+  @override
+  String get monthly => 'Her ay';
+
+  @override
+  String get yearly => 'Her yıl';
+
+  @override
+  String get custom => 'Özel';
+
+  @override
+  String get every => 'Her';
+
+  @override
+  String get interval => 'Aralık';
+
+  @override
+  String get unitDays => 'gün';
+
+  @override
+  String get unitWeeks => 'hafta';
+
+  @override
+  String get unitMonths => 'ay';
+
+  @override
+  String get unitYears => 'yıl';
+
+  @override
+  String get ends => 'Bitiş';
+
+  @override
+  String get never => 'Asla';
+
+  @override
+  String afterCount(int count) {
+    return '$count tekrar sonra';
+  }
+
+  @override
+  String get onDate => 'Tarihte';
+
+  @override
+  String get done => 'Tamam';
+
+  @override
+  String get reminders => 'Hatırlatıcılar';
+
+  @override
+  String get addReminder => 'Hatırlatıcı ekle';
+
+  @override
+  String minutesBefore(int minutes) {
+    return '$minutes dk önce';
+  }
+
+  @override
+  String hoursBefore(int hours) {
+    return '$hours saat önce';
+  }
+
+  @override
+  String daysBefore(int days) {
+    return '$days gün önce';
+  }
+
+  @override
+  String get atStart => 'Başlangıçta';
+
+  @override
+  String get timezone => 'Saat dilimi';
+
+  @override
+  String get notes => 'Notlar';
+
+  @override
+  String get addNote => 'Not ekle';
+
+  @override
+  String get editScopeTitle => 'Tekrarlayan etkinlik';
+
+  @override
+  String get editScopeOnlyThis => 'Yalnızca bu';
+
+  @override
+  String get editScopeFollowing => 'Bu ve sonrakiler';
+
+  @override
+  String get editScopeAll => 'Tüm seri';
+
+  @override
+  String get calendars => 'Takvimler';
+
+  @override
+  String get newCalendar => 'Yeni takvim';
+
+  @override
+  String get editCalendar => 'Takvimi düzenle';
+
+  @override
+  String get name => 'Ad';
+
+  @override
+  String get color => 'Renk';
+
+  @override
+  String get makeDefault => 'Varsayılan yap';
+
+  @override
+  String get defaultCalendar => 'Varsayılan';
+
+  @override
+  String get subscribeIcs => 'ICS takvimine abone ol';
+
+  @override
+  String get icsUrl => 'ICS adresi';
+
+  @override
+  String get icsHintHolidays => 'Örn. Türkiye resmî tatilleri';
+
+  @override
+  String get subscription => 'Abonelik (salt okunur)';
+
+  @override
+  String get refresh => 'Yenile';
+
+  @override
+  String icsFetched(int count) {
+    return '$count etkinlik alındı';
+  }
+
+  @override
+  String icsFetchFailed(String reason) {
+    return 'Takvim alınamadı: $reason';
+  }
+
+  @override
+  String get deleteCalendarConfirm =>
+      'Takvim ve içindeki tüm etkinlikler silinsin mi?';
+
+  @override
+  String get cannotDeleteLast => 'Son takvim silinemez';
+
+  @override
+  String get nameRequired => 'Ad gerekli';
+
+  @override
+  String get allDayEvents => 'Tüm gün';
+
+  @override
+  String weekNumber(int n) {
+    return '$n. hafta';
+  }
+
+  @override
+  String get nowLine => 'Şimdi';
 }

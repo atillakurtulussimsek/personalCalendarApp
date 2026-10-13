@@ -97,3 +97,24 @@ regardless, so this only affects recurrence expansion of events created in phase
 Foreground triggers (resume, connectivity, periodic timer, post-write debounce) cover
 phase 2. WorkManager periodic sync is added together with FCM in phase 5, because both
 need the same background isolate / shared-database setup (`shareAcrossIsolates`).
+
+## 2026-10-13 — ICS subscriptions are device-local
+
+**Decision:** Subscribed calendars (`calendars.source = 'ics'`) and their events live only in
+the device database; they are never pushed and the server knows nothing about them. Each
+device subscribes on its own and refreshes feeds every 12 hours.
+
+**Rationale:** Feeds are read-only and re-fetchable; syncing thousands of holiday rows through
+the outbox adds nothing. A synced "subscription list" can be added later if wanted.
+
+## 2026-10-13 — "This and following" is implemented client-side
+
+**Decision:** Splitting a series sets `UNTIL` on the master (one second before the edited
+instance, in the series zone), drops exceptions at or after the cut, and creates a new master
+with the remaining `COUNT` when the rule had one. The server only sees ordinary upserts.
+
+## 2026-10-13 — Timezone handling
+
+**Decision:** `flutter_timezone` provides the device IANA name, `timezone` provides the tz
+database; recurrence is iterated in "wall time" (`Tz.toWall`/`fromWall`) so local hours
+survive DST, matching `teambition/rrule-go` with `StrToROptionInLocation` on the server.

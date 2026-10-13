@@ -15,7 +15,7 @@ docs/      mimari, API (OpenAPI), karar günlüğü
 |-----|--------|-------|
 | 1 | Backend temeli: auth, CRUD, `/sync`, RRULE genişletme, testler, Docker | ✅ |
 | 2 | Flutter temeli: drift, auth, outbox + sync, notlar, ay/ajanda | ✅ |
-| 3 | Takvim derinliği | |
+| 3 | Takvim derinliği: hafta/gün, sürükle-bırak, tekrar kuralları, istisnalar, ICS abonelik | ✅ |
 | 4 | Anlık yakalama (Türkçe NLP, widget, menü çubuğu) | |
 | 5 | Bildirimler ve canlı senkron | |
 | 6 | Cilalama: görevler, ICS, yedekleme, CalDAV (ops.) | |

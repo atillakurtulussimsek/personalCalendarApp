@@ -20,6 +20,7 @@ CalendarsCompanion calendarFromJson(Map<String, dynamic> j, {bool? visible}) => 
       color: Value(j['color'] as String? ?? '#3B82F6'),
       isDefault: Value(j['is_default'] as bool? ?? false),
       visible: visible == null ? const Value.absent() : Value(visible),
+      source: const Value('local'),
       createdAt: Value(_dt(j['created_at'])),
       updatedAt: Value(_dt(j['updated_at'])),
       deletedAt: Value(_dtn(j['deleted_at'])),

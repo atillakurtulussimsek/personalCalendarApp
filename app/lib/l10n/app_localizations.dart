@@ -416,6 +416,324 @@ abstract class L10n {
   /// In tr, this message translates to:
   /// **'Yükleniyor…'**
   String get loading;
+
+  /// No description provided for @week.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hafta'**
+  String get week;
+
+  /// No description provided for @day.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gün'**
+  String get day;
+
+  /// No description provided for @repeat.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tekrar'**
+  String get repeat;
+
+  /// No description provided for @noRepeat.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tekrarlama'**
+  String get noRepeat;
+
+  /// No description provided for @daily.
+  ///
+  /// In tr, this message translates to:
+  /// **'Her gün'**
+  String get daily;
+
+  /// No description provided for @weekly.
+  ///
+  /// In tr, this message translates to:
+  /// **'Her hafta'**
+  String get weekly;
+
+  /// No description provided for @monthly.
+  ///
+  /// In tr, this message translates to:
+  /// **'Her ay'**
+  String get monthly;
+
+  /// No description provided for @yearly.
+  ///
+  /// In tr, this message translates to:
+  /// **'Her yıl'**
+  String get yearly;
+
+  /// No description provided for @custom.
+  ///
+  /// In tr, this message translates to:
+  /// **'Özel'**
+  String get custom;
+
+  /// No description provided for @every.
+  ///
+  /// In tr, this message translates to:
+  /// **'Her'**
+  String get every;
+
+  /// No description provided for @interval.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aralık'**
+  String get interval;
+
+  /// No description provided for @unitDays.
+  ///
+  /// In tr, this message translates to:
+  /// **'gün'**
+  String get unitDays;
+
+  /// No description provided for @unitWeeks.
+  ///
+  /// In tr, this message translates to:
+  /// **'hafta'**
+  String get unitWeeks;
+
+  /// No description provided for @unitMonths.
+  ///
+  /// In tr, this message translates to:
+  /// **'ay'**
+  String get unitMonths;
+
+  /// No description provided for @unitYears.
+  ///
+  /// In tr, this message translates to:
+  /// **'yıl'**
+  String get unitYears;
+
+  /// No description provided for @ends.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bitiş'**
+  String get ends;
+
+  /// No description provided for @never.
+  ///
+  /// In tr, this message translates to:
+  /// **'Asla'**
+  String get never;
+
+  /// No description provided for @afterCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} tekrar sonra'**
+  String afterCount(int count);
+
+  /// No description provided for @onDate.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarihte'**
+  String get onDate;
+
+  /// No description provided for @done.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamam'**
+  String get done;
+
+  /// No description provided for @reminders.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hatırlatıcılar'**
+  String get reminders;
+
+  /// No description provided for @addReminder.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hatırlatıcı ekle'**
+  String get addReminder;
+
+  /// No description provided for @minutesBefore.
+  ///
+  /// In tr, this message translates to:
+  /// **'{minutes} dk önce'**
+  String minutesBefore(int minutes);
+
+  /// No description provided for @hoursBefore.
+  ///
+  /// In tr, this message translates to:
+  /// **'{hours} saat önce'**
+  String hoursBefore(int hours);
+
+  /// No description provided for @daysBefore.
+  ///
+  /// In tr, this message translates to:
+  /// **'{days} gün önce'**
+  String daysBefore(int days);
+
+  /// No description provided for @atStart.
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlangıçta'**
+  String get atStart;
+
+  /// No description provided for @timezone.
+  ///
+  /// In tr, this message translates to:
+  /// **'Saat dilimi'**
+  String get timezone;
+
+  /// No description provided for @notes.
+  ///
+  /// In tr, this message translates to:
+  /// **'Notlar'**
+  String get notes;
+
+  /// No description provided for @addNote.
+  ///
+  /// In tr, this message translates to:
+  /// **'Not ekle'**
+  String get addNote;
+
+  /// No description provided for @editScopeTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tekrarlayan etkinlik'**
+  String get editScopeTitle;
+
+  /// No description provided for @editScopeOnlyThis.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yalnızca bu'**
+  String get editScopeOnlyThis;
+
+  /// No description provided for @editScopeFollowing.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu ve sonrakiler'**
+  String get editScopeFollowing;
+
+  /// No description provided for @editScopeAll.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm seri'**
+  String get editScopeAll;
+
+  /// No description provided for @calendars.
+  ///
+  /// In tr, this message translates to:
+  /// **'Takvimler'**
+  String get calendars;
+
+  /// No description provided for @newCalendar.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni takvim'**
+  String get newCalendar;
+
+  /// No description provided for @editCalendar.
+  ///
+  /// In tr, this message translates to:
+  /// **'Takvimi düzenle'**
+  String get editCalendar;
+
+  /// No description provided for @name.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad'**
+  String get name;
+
+  /// No description provided for @color.
+  ///
+  /// In tr, this message translates to:
+  /// **'Renk'**
+  String get color;
+
+  /// No description provided for @makeDefault.
+  ///
+  /// In tr, this message translates to:
+  /// **'Varsayılan yap'**
+  String get makeDefault;
+
+  /// No description provided for @defaultCalendar.
+  ///
+  /// In tr, this message translates to:
+  /// **'Varsayılan'**
+  String get defaultCalendar;
+
+  /// No description provided for @subscribeIcs.
+  ///
+  /// In tr, this message translates to:
+  /// **'ICS takvimine abone ol'**
+  String get subscribeIcs;
+
+  /// No description provided for @icsUrl.
+  ///
+  /// In tr, this message translates to:
+  /// **'ICS adresi'**
+  String get icsUrl;
+
+  /// No description provided for @icsHintHolidays.
+  ///
+  /// In tr, this message translates to:
+  /// **'Örn. Türkiye resmî tatilleri'**
+  String get icsHintHolidays;
+
+  /// No description provided for @subscription.
+  ///
+  /// In tr, this message translates to:
+  /// **'Abonelik (salt okunur)'**
+  String get subscription;
+
+  /// No description provided for @refresh.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yenile'**
+  String get refresh;
+
+  /// No description provided for @icsFetched.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} etkinlik alındı'**
+  String icsFetched(int count);
+
+  /// No description provided for @icsFetchFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Takvim alınamadı: {reason}'**
+  String icsFetchFailed(String reason);
+
+  /// No description provided for @deleteCalendarConfirm.
+  ///
+  /// In tr, this message translates to:
+  /// **'Takvim ve içindeki tüm etkinlikler silinsin mi?'**
+  String get deleteCalendarConfirm;
+
+  /// No description provided for @cannotDeleteLast.
+  ///
+  /// In tr, this message translates to:
+  /// **'Son takvim silinemez'**
+  String get cannotDeleteLast;
+
+  /// No description provided for @nameRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ad gerekli'**
+  String get nameRequired;
+
+  /// No description provided for @allDayEvents.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm gün'**
+  String get allDayEvents;
+
+  /// No description provided for @weekNumber.
+  ///
+  /// In tr, this message translates to:
+  /// **'{n}. hafta'**
+  String weekNumber(int n);
+
+  /// No description provided for @nowLine.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şimdi'**
+  String get nowLine;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers.dart';
 import '../calendar/calendar_screen.dart';
+import '../calendar/calendars_screen.dart';
 import '../notes/note_editor_screen.dart';
 import '../notes/notes_screen.dart';
 import 'sync_indicator.dart';
@@ -59,8 +60,12 @@ class _HomeShellState extends ConsumerState<HomeShell> {
           PopupMenuButton<String>(
             onSelected: (v) {
               if (v == 'logout') ref.read(sessionProvider.notifier).logout();
+              if (v == 'calendars') Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const CalendarsScreen()));
             },
-            itemBuilder: (_) => [PopupMenuItem(value: 'logout', child: Text(l.logout))],
+            itemBuilder: (_) => [
+              PopupMenuItem(value: 'calendars', child: Text(l.calendars)),
+              PopupMenuItem(value: 'logout', child: Text(l.logout)),
+            ],
           ),
         ],
       ),

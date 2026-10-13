@@ -124,6 +124,37 @@ class $CalendarsTable extends Calendars
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('local'),
+  );
+  static const VerificationMeta _icsUrlMeta = const VerificationMeta('icsUrl');
+  @override
+  late final GeneratedColumn<String> icsUrl = GeneratedColumn<String>(
+    'ics_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastFetchedAtMeta = const VerificationMeta(
+    'lastFetchedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastFetchedAt =
+      GeneratedColumn<DateTime>(
+        'last_fetched_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -136,6 +167,9 @@ class $CalendarsTable extends Calendars
     color,
     isDefault,
     visible,
+    source,
+    icsUrl,
+    lastFetchedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -214,6 +248,27 @@ class $CalendarsTable extends Calendars
         visible.isAcceptableOrUnknown(data['visible']!, _visibleMeta),
       );
     }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    }
+    if (data.containsKey('ics_url')) {
+      context.handle(
+        _icsUrlMeta,
+        icsUrl.isAcceptableOrUnknown(data['ics_url']!, _icsUrlMeta),
+      );
+    }
+    if (data.containsKey('last_fetched_at')) {
+      context.handle(
+        _lastFetchedAtMeta,
+        lastFetchedAt.isAcceptableOrUnknown(
+          data['last_fetched_at']!,
+          _lastFetchedAtMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -263,6 +318,18 @@ class $CalendarsTable extends Calendars
         DriftSqlType.bool,
         data['${effectivePrefix}visible'],
       )!,
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      )!,
+      icsUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ics_url'],
+      ),
+      lastFetchedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_fetched_at'],
+      ),
     );
   }
 
@@ -283,6 +350,11 @@ class Calendar extends DataClass implements Insertable<Calendar> {
   final String color;
   final bool isDefault;
   final bool visible;
+
+  /// 'local' (synced with the server) or 'ics' (read-only subscription, device-local).
+  final String source;
+  final String? icsUrl;
+  final DateTime? lastFetchedAt;
   const Calendar({
     required this.id,
     required this.createdAt,
@@ -294,6 +366,9 @@ class Calendar extends DataClass implements Insertable<Calendar> {
     required this.color,
     required this.isDefault,
     required this.visible,
+    required this.source,
+    this.icsUrl,
+    this.lastFetchedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -310,6 +385,13 @@ class Calendar extends DataClass implements Insertable<Calendar> {
     map['color'] = Variable<String>(color);
     map['is_default'] = Variable<bool>(isDefault);
     map['visible'] = Variable<bool>(visible);
+    map['source'] = Variable<String>(source);
+    if (!nullToAbsent || icsUrl != null) {
+      map['ics_url'] = Variable<String>(icsUrl);
+    }
+    if (!nullToAbsent || lastFetchedAt != null) {
+      map['last_fetched_at'] = Variable<DateTime>(lastFetchedAt);
+    }
     return map;
   }
 
@@ -327,6 +409,13 @@ class Calendar extends DataClass implements Insertable<Calendar> {
       color: Value(color),
       isDefault: Value(isDefault),
       visible: Value(visible),
+      source: Value(source),
+      icsUrl: icsUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(icsUrl),
+      lastFetchedAt: lastFetchedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastFetchedAt),
     );
   }
 
@@ -346,6 +435,9 @@ class Calendar extends DataClass implements Insertable<Calendar> {
       color: serializer.fromJson<String>(json['color']),
       isDefault: serializer.fromJson<bool>(json['isDefault']),
       visible: serializer.fromJson<bool>(json['visible']),
+      source: serializer.fromJson<String>(json['source']),
+      icsUrl: serializer.fromJson<String?>(json['icsUrl']),
+      lastFetchedAt: serializer.fromJson<DateTime?>(json['lastFetchedAt']),
     );
   }
   @override
@@ -362,6 +454,9 @@ class Calendar extends DataClass implements Insertable<Calendar> {
       'color': serializer.toJson<String>(color),
       'isDefault': serializer.toJson<bool>(isDefault),
       'visible': serializer.toJson<bool>(visible),
+      'source': serializer.toJson<String>(source),
+      'icsUrl': serializer.toJson<String?>(icsUrl),
+      'lastFetchedAt': serializer.toJson<DateTime?>(lastFetchedAt),
     };
   }
 
@@ -376,6 +471,9 @@ class Calendar extends DataClass implements Insertable<Calendar> {
     String? color,
     bool? isDefault,
     bool? visible,
+    String? source,
+    Value<String?> icsUrl = const Value.absent(),
+    Value<DateTime?> lastFetchedAt = const Value.absent(),
   }) => Calendar(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -387,6 +485,11 @@ class Calendar extends DataClass implements Insertable<Calendar> {
     color: color ?? this.color,
     isDefault: isDefault ?? this.isDefault,
     visible: visible ?? this.visible,
+    source: source ?? this.source,
+    icsUrl: icsUrl.present ? icsUrl.value : this.icsUrl,
+    lastFetchedAt: lastFetchedAt.present
+        ? lastFetchedAt.value
+        : this.lastFetchedAt,
   );
   Calendar copyWithCompanion(CalendarsCompanion data) {
     return Calendar(
@@ -400,6 +503,11 @@ class Calendar extends DataClass implements Insertable<Calendar> {
       color: data.color.present ? data.color.value : this.color,
       isDefault: data.isDefault.present ? data.isDefault.value : this.isDefault,
       visible: data.visible.present ? data.visible.value : this.visible,
+      source: data.source.present ? data.source.value : this.source,
+      icsUrl: data.icsUrl.present ? data.icsUrl.value : this.icsUrl,
+      lastFetchedAt: data.lastFetchedAt.present
+          ? data.lastFetchedAt.value
+          : this.lastFetchedAt,
     );
   }
 
@@ -415,7 +523,10 @@ class Calendar extends DataClass implements Insertable<Calendar> {
           ..write('name: $name, ')
           ..write('color: $color, ')
           ..write('isDefault: $isDefault, ')
-          ..write('visible: $visible')
+          ..write('visible: $visible, ')
+          ..write('source: $source, ')
+          ..write('icsUrl: $icsUrl, ')
+          ..write('lastFetchedAt: $lastFetchedAt')
           ..write(')'))
         .toString();
   }
@@ -432,6 +543,9 @@ class Calendar extends DataClass implements Insertable<Calendar> {
     color,
     isDefault,
     visible,
+    source,
+    icsUrl,
+    lastFetchedAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -446,7 +560,10 @@ class Calendar extends DataClass implements Insertable<Calendar> {
           other.name == this.name &&
           other.color == this.color &&
           other.isDefault == this.isDefault &&
-          other.visible == this.visible);
+          other.visible == this.visible &&
+          other.source == this.source &&
+          other.icsUrl == this.icsUrl &&
+          other.lastFetchedAt == this.lastFetchedAt);
 }
 
 class CalendarsCompanion extends UpdateCompanion<Calendar> {
@@ -460,6 +577,9 @@ class CalendarsCompanion extends UpdateCompanion<Calendar> {
   final Value<String> color;
   final Value<bool> isDefault;
   final Value<bool> visible;
+  final Value<String> source;
+  final Value<String?> icsUrl;
+  final Value<DateTime?> lastFetchedAt;
   final Value<int> rowid;
   const CalendarsCompanion({
     this.id = const Value.absent(),
@@ -472,6 +592,9 @@ class CalendarsCompanion extends UpdateCompanion<Calendar> {
     this.color = const Value.absent(),
     this.isDefault = const Value.absent(),
     this.visible = const Value.absent(),
+    this.source = const Value.absent(),
+    this.icsUrl = const Value.absent(),
+    this.lastFetchedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CalendarsCompanion.insert({
@@ -485,6 +608,9 @@ class CalendarsCompanion extends UpdateCompanion<Calendar> {
     this.color = const Value.absent(),
     this.isDefault = const Value.absent(),
     this.visible = const Value.absent(),
+    this.source = const Value.absent(),
+    this.icsUrl = const Value.absent(),
+    this.lastFetchedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        createdAt = Value(createdAt),
@@ -501,6 +627,9 @@ class CalendarsCompanion extends UpdateCompanion<Calendar> {
     Expression<String>? color,
     Expression<bool>? isDefault,
     Expression<bool>? visible,
+    Expression<String>? source,
+    Expression<String>? icsUrl,
+    Expression<DateTime>? lastFetchedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -514,6 +643,9 @@ class CalendarsCompanion extends UpdateCompanion<Calendar> {
       if (color != null) 'color': color,
       if (isDefault != null) 'is_default': isDefault,
       if (visible != null) 'visible': visible,
+      if (source != null) 'source': source,
+      if (icsUrl != null) 'ics_url': icsUrl,
+      if (lastFetchedAt != null) 'last_fetched_at': lastFetchedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -529,6 +661,9 @@ class CalendarsCompanion extends UpdateCompanion<Calendar> {
     Value<String>? color,
     Value<bool>? isDefault,
     Value<bool>? visible,
+    Value<String>? source,
+    Value<String?>? icsUrl,
+    Value<DateTime?>? lastFetchedAt,
     Value<int>? rowid,
   }) {
     return CalendarsCompanion(
@@ -542,6 +677,9 @@ class CalendarsCompanion extends UpdateCompanion<Calendar> {
       color: color ?? this.color,
       isDefault: isDefault ?? this.isDefault,
       visible: visible ?? this.visible,
+      source: source ?? this.source,
+      icsUrl: icsUrl ?? this.icsUrl,
+      lastFetchedAt: lastFetchedAt ?? this.lastFetchedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -579,6 +717,15 @@ class CalendarsCompanion extends UpdateCompanion<Calendar> {
     if (visible.present) {
       map['visible'] = Variable<bool>(visible.value);
     }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (icsUrl.present) {
+      map['ics_url'] = Variable<String>(icsUrl.value);
+    }
+    if (lastFetchedAt.present) {
+      map['last_fetched_at'] = Variable<DateTime>(lastFetchedAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -598,6 +745,9 @@ class CalendarsCompanion extends UpdateCompanion<Calendar> {
           ..write('color: $color, ')
           ..write('isDefault: $isDefault, ')
           ..write('visible: $visible, ')
+          ..write('source: $source, ')
+          ..write('icsUrl: $icsUrl, ')
+          ..write('lastFetchedAt: $lastFetchedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3043,6 +3193,9 @@ typedef $$CalendarsTableCreateCompanionBuilder = CalendarsCompanion Function({
   Value<String> color,
   Value<bool> isDefault,
   Value<bool> visible,
+  Value<String> source,
+  Value<String?> icsUrl,
+  Value<DateTime?> lastFetchedAt,
   Value<int> rowid,
 });
 typedef $$CalendarsTableUpdateCompanionBuilder = CalendarsCompanion Function({
@@ -3056,6 +3209,9 @@ typedef $$CalendarsTableUpdateCompanionBuilder = CalendarsCompanion Function({
   Value<String> color,
   Value<bool> isDefault,
   Value<bool> visible,
+  Value<String> source,
+  Value<String?> icsUrl,
+  Value<DateTime?> lastFetchedAt,
   Value<int> rowid,
 });
 
@@ -3115,6 +3271,21 @@ class $$CalendarsTableFilterComposer
 
   ColumnFilters<bool> get visible => $composableBuilder(
     column: $table.visible,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get icsUrl => $composableBuilder(
+    column: $table.icsUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastFetchedAt => $composableBuilder(
+    column: $table.lastFetchedAt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3177,6 +3348,21 @@ class $$CalendarsTableOrderingComposer
     column: $table.visible,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get icsUrl => $composableBuilder(
+    column: $table.icsUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastFetchedAt => $composableBuilder(
+    column: $table.lastFetchedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CalendarsTableAnnotationComposer
@@ -3217,6 +3403,17 @@ class $$CalendarsTableAnnotationComposer
 
   GeneratedColumn<bool> get visible =>
       $composableBuilder(column: $table.visible, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<String> get icsUrl =>
+      $composableBuilder(column: $table.icsUrl, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastFetchedAt => $composableBuilder(
+    column: $table.lastFetchedAt,
+    builder: (column) => column,
+  );
 }
 
 class $$CalendarsTableTableManager
@@ -3257,6 +3454,9 @@ class $$CalendarsTableTableManager
                 Value<String> color = const Value.absent(),
                 Value<bool> isDefault = const Value.absent(),
                 Value<bool> visible = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                Value<String?> icsUrl = const Value.absent(),
+                Value<DateTime?> lastFetchedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CalendarsCompanion(
                 id: id,
@@ -3269,6 +3469,9 @@ class $$CalendarsTableTableManager
                 color: color,
                 isDefault: isDefault,
                 visible: visible,
+                source: source,
+                icsUrl: icsUrl,
+                lastFetchedAt: lastFetchedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3283,6 +3486,9 @@ class $$CalendarsTableTableManager
                 Value<String> color = const Value.absent(),
                 Value<bool> isDefault = const Value.absent(),
                 Value<bool> visible = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                Value<String?> icsUrl = const Value.absent(),
+                Value<DateTime?> lastFetchedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CalendarsCompanion.insert(
                 id: id,
@@ -3295,6 +3501,9 @@ class $$CalendarsTableTableManager
                 color: color,
                 isDefault: isDefault,
                 visible: visible,
+                source: source,
+                icsUrl: icsUrl,
+                lastFetchedAt: lastFetchedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

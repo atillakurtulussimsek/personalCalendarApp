@@ -16,6 +16,11 @@ class Calendars extends Table with SyncColumns {
   BoolColumn get isDefault => boolean().withDefault(const Constant(false))();
   BoolColumn get visible => boolean().withDefault(const Constant(true))();
 
+  /// 'local' (synced with the server) or 'ics' (read-only subscription, device-local).
+  TextColumn get source => text().withDefault(const Constant('local'))();
+  TextColumn get icsUrl => text().nullable()();
+  DateTimeColumn get lastFetchedAt => dateTime().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }

@@ -50,9 +50,27 @@ lib/data/repositories          local-first writes: DB + outbox + sync nudge
 lib/providers.dart             Riverpod wiring, session state, sync triggers
 lib/features/auth              login / register
 lib/features/home              shell (bottom nav / rail), sync indicator, shortcuts
-lib/features/calendar          month grid + day list, agenda, quick event sheet
+lib/features/calendar          month / week / day (drag & drop, resize) / agenda, full event editor,
+                               recurrence picker, edit-scope dialog, calendars + ICS subscriptions
+lib/core/recurrence.dart       RRULE expansion with exceptions (mirrors the server)
+lib/core/tz.dart               IANA zones (timezone + flutter_timezone), wall-time conversions
+lib/core/ics.dart              minimal iCalendar parser for subscriptions
 lib/features/notes             list + FTS search, Markdown editor with autosave
 ```
+
+## Calendar behaviour
+
+* Recurring events are expanded on the device in the event's own IANA zone
+  (`core/recurrence.dart`), identical to the server's `expand=true`. Exceptions
+  (`recurrence_id` + `original_start`) replace or cancel single instances.
+* Editing an instance asks for a scope: **only this** (creates/updates an exception row),
+  **this and following** (sets `UNTIL` on the master, starts a new series with the remaining
+  `COUNT`), **all** (edits the master, shifting times by the delta applied to the instance).
+* Week/day grid: drag a block to move it (mouse drag on macOS, long-press on Android), drag the
+  bottom handle to resize; 15-minute snapping; tap an empty slot to create.
+* ICS subscriptions (e.g. Turkish public holidays) are device-local, read-only calendars
+  refreshed every 12 hours; they are never pushed to the server.
+* Shortcuts: ←/→ day, ↑/↓ week, PgUp/PgDn period, T today, M/W/D/A views, ⌘N new, ⌘S save.
 
 ## Sync behaviour
 

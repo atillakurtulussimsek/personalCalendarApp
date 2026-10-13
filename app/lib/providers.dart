@@ -10,6 +10,7 @@ import 'data/api/sync_api.dart';
 import 'data/api/token_store.dart';
 import 'data/db/database.dart';
 import 'data/repositories/auth_repository.dart';
+import 'data/repositories/ics_service.dart';
 import 'data/repositories/repositories.dart';
 import 'data/sync/sync_service.dart';
 
@@ -51,6 +52,7 @@ final calendarRepositoryProvider =
     Provider<CalendarRepository>((ref) => CalendarRepository(ref.watch(databaseProvider), ref.watch(syncServiceProvider)));
 final eventRepositoryProvider =
     Provider<EventRepository>((ref) => EventRepository(ref.watch(databaseProvider), ref.watch(syncServiceProvider)));
+final icsServiceProvider = Provider<IcsService>((ref) => IcsService(ref.watch(calendarRepositoryProvider)));
 final noteRepositoryProvider =
     Provider<NoteRepository>((ref) => NoteRepository(ref.watch(databaseProvider), ref.watch(syncServiceProvider)));
 
@@ -99,8 +101,9 @@ final sessionProvider = NotifierProvider<SessionNotifier, SessionState>(SessionN
 
 /// Triggers sync on foreground, connectivity regain and a periodic timer.
 class SyncTriggers with WidgetsBindingObserver {
-  SyncTriggers(this.sync);
+  SyncTriggers(this.sync, this.ics);
   final SyncService sync;
+  final IcsService ics;
   StreamSubscription<List<ConnectivityResult>>? _conn;
   Timer? _periodic;
 
@@ -109,13 +112,20 @@ class SyncTriggers with WidgetsBindingObserver {
     _conn = Connectivity().onConnectivityChanged.listen((results) {
       if (results.any((r) => r != ConnectivityResult.none)) sync.sync();
     });
-    _periodic = Timer.periodic(const Duration(minutes: 5), (_) => sync.sync());
+    _periodic = Timer.periodic(const Duration(minutes: 5), (_) {
+      sync.sync();
+      ics.refreshStale();
+    });
     sync.sync();
+    ics.refreshStale();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) sync.sync();
+    if (state == AppLifecycleState.resumed) {
+      sync.sync();
+      ics.refreshStale();
+    }
   }
 
   void stop() {
@@ -126,7 +136,7 @@ class SyncTriggers with WidgetsBindingObserver {
 }
 
 final syncTriggersProvider = Provider<SyncTriggers>((ref) {
-  final t = SyncTriggers(ref.watch(syncServiceProvider));
+  final t = SyncTriggers(ref.watch(syncServiceProvider), ref.watch(icsServiceProvider));
   ref.onDispose(t.stop);
   return t;
 });

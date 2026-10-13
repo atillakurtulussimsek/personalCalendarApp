@@ -15,11 +15,23 @@
   "invalidEmail": "Geçerli bir e-posta gir",
   "passwordTooShort": "Parola en az 8 karakter olmalı",
   "authFailed": "Giriş başarısız: {reason}",
-  "@authFailed": {"placeholders": {"reason": {"type": "String"}}},
+  "@authFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
   "networkError": "Sunucuya ulaşılamadı",
   "syncStatusSynced": "Senkronlandı",
   "syncStatusPending": "{count} bekleyen değişiklik",
-  "@syncStatusPending": {"placeholders": {"count": {"type": "int"}}},
+  "@syncStatusPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "syncStatusSyncing": "Senkronlanıyor…",
   "syncStatusOffline": "Çevrimdışı",
   "syncStatusError": "Senkron hatası",
@@ -55,5 +67,107 @@
   "untitled": "Başlıksız",
   "conflictCopy": "(çakışan kopya)",
   "retry": "Tekrar dene",
-  "loading": "Yükleniyor…"
+  "loading": "Yükleniyor…",
+  "week": "Hafta",
+  "day": "Gün",
+  "repeat": "Tekrar",
+  "noRepeat": "Tekrarlama",
+  "daily": "Her gün",
+  "weekly": "Her hafta",
+  "monthly": "Her ay",
+  "yearly": "Her yıl",
+  "custom": "Özel",
+  "every": "Her",
+  "interval": "Aralık",
+  "unitDays": "gün",
+  "unitWeeks": "hafta",
+  "unitMonths": "ay",
+  "unitYears": "yıl",
+  "ends": "Bitiş",
+  "never": "Asla",
+  "afterCount": "{count} tekrar sonra",
+  "@afterCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "onDate": "Tarihte",
+  "done": "Tamam",
+  "reminders": "Hatırlatıcılar",
+  "addReminder": "Hatırlatıcı ekle",
+  "minutesBefore": "{minutes} dk önce",
+  "@minutesBefore": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursBefore": "{hours} saat önce",
+  "@hoursBefore": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "daysBefore": "{days} gün önce",
+  "@daysBefore": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "atStart": "Başlangıçta",
+  "timezone": "Saat dilimi",
+  "notes": "Notlar",
+  "addNote": "Not ekle",
+  "editScopeTitle": "Tekrarlayan etkinlik",
+  "editScopeOnlyThis": "Yalnızca bu",
+  "editScopeFollowing": "Bu ve sonrakiler",
+  "editScopeAll": "Tüm seri",
+  "calendars": "Takvimler",
+  "newCalendar": "Yeni takvim",
+  "editCalendar": "Takvimi düzenle",
+  "name": "Ad",
+  "color": "Renk",
+  "makeDefault": "Varsayılan yap",
+  "defaultCalendar": "Varsayılan",
+  "subscribeIcs": "ICS takvimine abone ol",
+  "icsUrl": "ICS adresi",
+  "icsHintHolidays": "Örn. Türkiye resmî tatilleri",
+  "subscription": "Abonelik (salt okunur)",
+  "refresh": "Yenile",
+  "icsFetched": "{count} etkinlik alındı",
+  "@icsFetched": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "icsFetchFailed": "Takvim alınamadı: {reason}",
+  "@icsFetchFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteCalendarConfirm": "Takvim ve içindeki tüm etkinlikler silinsin mi?",
+  "cannotDeleteLast": "Son takvim silinemez",
+  "nameRequired": "Ad gerekli",
+  "allDayEvents": "Tüm gün",
+  "weekNumber": "{n}. hafta",
+  "@weekNumber": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "nowLine": "Şimdi"
 }
