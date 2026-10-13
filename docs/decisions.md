@@ -1,0 +1,73 @@
+# Architecture Decision Log
+
+Each entry: date, decision, rationale. Newest at the bottom.
+
+## 2026-10-13 — MySQL 8 instead of PostgreSQL 16
+
+**Decision:** The backend uses MySQL 8.x (`go-sql-driver/mysql`) instead of PostgreSQL/`pgx`.
+`sqlc` (engine `mysql`) and `golang-migrate` (mysql driver) are kept as planned.
+
+**Rationale:** The project owner asked for MySQL explicitly (no PostgreSQL experience,
+existing remote MySQL available). Consequences:
+
+- UUIDs are stored as `CHAR(36)` (client-generated, canonical lowercase form).
+- `notes.tags` is a `JSON` array of strings instead of `text[]`.
+- `events.reminders` is a `JSON` array of integers (minutes before start).
+- Full-text search on notes uses a MySQL `FULLTEXT` index (server side); the client
+  still uses SQLite FTS5.
+- The global monotonic `server_seq` is produced by a single-row `sync_counter` table
+  updated inside the same transaction as the write
+  (`UPDATE sync_counter SET value = LAST_INSERT_ID(value + 1)`), which is the standard
+  MySQL pattern for a gap-free, ordered sequence.
+- All `DATETIME(6)` columns hold UTC; the DSN uses `parseTime=true&loc=UTC`.
+
+## 2026-10-13 — Local development database
+
+**Decision:** Development uses a remote MySQL instance provided via `DATABASE_URL` in `.env`.
+Integration tests run only when `TEST_DATABASE_URL` is set and use a dedicated database
+(they drop and re-create all tables).
+
+**Rationale:** No Docker on the development machine; the owner prefers a remote MySQL.
+
+## 2026-10-13 — Production database in docker-compose
+
+**Decision:** `docker-compose.yml` ships a `mysql:8.4` service with a named volume next to the
+API, so the stack deploys to Dokploy as one compose project. Pointing the API to an external
+MySQL only requires overriding `DATABASE_URL`.
+
+**Rationale:** No preference was given; a self-contained compose is the simplest Dokploy deploy.
+
+## 2026-10-13 — Registration policy
+
+**Decision:** `POST /auth/register` is open by default and can be closed with
+`ALLOW_REGISTRATION=false` once the owner's account exists.
+
+## 2026-10-13 — Migrations run on startup
+
+**Decision:** The API binary embeds its SQL migrations and applies pending ones at startup
+(`golang-migrate` library with `iofs` source). The `migrate` CLI is only needed to author
+new migrations.
+
+**Rationale:** Zero-step deploys on Dokploy; the container is the only thing that needs to run.
+
+## 2026-10-13 — Sync conflict policy
+
+**Decision:** `POST /sync` applies "last writer wins" on `updated_at` when the pushed
+`base_version` does not match the server version. For `notes`, the losing body is never
+discarded: it is stored as a new note titled `(çakışan kopya) <title>` owned by the same user,
+and the id of that copy is returned to the pushing client.
+
+## 2026-10-13 — Recurrence expansion lives on the server too
+
+**Decision:** `GET /events?from=&to=&expand=true` expands RRULEs with `teambition/rrule-go`
+already in phase 1, honouring exception instances (`recurrence_id` + `original_start`).
+The client gets its own expansion in phase 3 (Dart `rrule` package).
+
+**Rationale:** The endpoint is part of the public API contract; having it server side early
+makes the OpenAPI spec and integration tests complete.
+
+## 2026-10-13 — Exactly one default calendar
+
+**Decision:** A user always has exactly one default calendar. `is_default=true` on a
+create/update moves the flag; `is_default=false` on the current default is ignored.
+Deleting the default promotes the first remaining calendar. The last calendar cannot be deleted.

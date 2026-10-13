@@ -1,0 +1,495 @@
+openapi: 3.0.3
+info:
+  title: Personal Calendar API
+  version: 0.1.0
+  description: |
+    Self-hosted calendar + notes backend with offline-first sync.
+    All timestamps are RFC 3339 in UTC. All ids are client-generated UUIDs.
+    Errors always use `{ "error": { "code", "message" } }`.
+servers:
+  - url: http://localhost:8080
+security:
+  - bearerAuth: []
+tags:
+  - name: auth
+  - name: calendars
+  - name: events
+  - name: notes
+  - name: sync
+  - name: devices
+
+paths:
+  /healthz:
+    get:
+      security: []
+      summary: Liveness probe
+      responses:
+        "200": { description: OK }
+
+  /auth/register:
+    post:
+      tags: [auth]
+      security: []
+      summary: Create an account (disabled when ALLOW_REGISTRATION=false)
+      requestBody: { $ref: "#/components/requestBodies/Credentials" }
+      responses:
+        "200": { $ref: "#/components/responses/Tokens" }
+        "403": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+  /auth/login:
+    post:
+      tags: [auth]
+      security: []
+      requestBody: { $ref: "#/components/requestBodies/Credentials" }
+      responses:
+        "200": { $ref: "#/components/responses/Tokens" }
+        "401": { $ref: "#/components/responses/Error" }
+  /auth/refresh:
+    post:
+      tags: [auth]
+      security: []
+      summary: Rotate the refresh token and get a new access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RefreshRequest" }
+      responses:
+        "200": { $ref: "#/components/responses/Tokens" }
+        "401": { $ref: "#/components/responses/Error" }
+  /auth/logout:
+    post:
+      tags: [auth]
+      summary: Revoke a refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RefreshRequest" }
+      responses:
+        "204": { description: Revoked }
+  /auth/me:
+    get:
+      tags: [auth]
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+
+  /calendars:
+    get:
+      tags: [calendars]
+      responses:
+        "200":
+          description: Live calendars
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  calendars: { type: array, items: { $ref: "#/components/schemas/Calendar" } }
+    post:
+      tags: [calendars]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CalendarInput" }
+      responses:
+        "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/Calendar" } } } }
+        "422": { $ref: "#/components/responses/Error" }
+  /calendars/{id}:
+    parameters: [ { $ref: "#/components/parameters/Id" } ]
+    get:
+      tags: [calendars]
+      responses:
+        "200": { description: Calendar, content: { application/json: { schema: { $ref: "#/components/schemas/Calendar" } } } }
+        "404": { $ref: "#/components/responses/Error" }
+    put:
+      tags: [calendars]
+      description: Full replacement. Send `version` for optimistic concurrency (409 on mismatch).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CalendarInput" }
+      responses:
+        "200": { description: Updated, content: { application/json: { schema: { $ref: "#/components/schemas/Calendar" } } } }
+        "409": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+    delete:
+      tags: [calendars]
+      description: Soft-deletes the calendar and all its events. The last calendar cannot be deleted.
+      responses:
+        "204": { description: Deleted }
+        "404": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+
+  /events:
+    get:
+      tags: [events]
+      parameters:
+        - { name: from, in: query, schema: { type: string, format: date-time }, description: default now-1 month }
+        - { name: to, in: query, schema: { type: string, format: date-time }, description: default from+2 months, max 2 years }
+        - { name: expand, in: query, schema: { type: boolean }, description: expand recurring events into occurrences }
+      responses:
+        "200":
+          description: Without expand `events` (raw rows overlapping the range, recurring masters included); with expand `occurrences`.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  events: { type: array, items: { $ref: "#/components/schemas/Event" } }
+                  occurrences: { type: array, items: { $ref: "#/components/schemas/Occurrence" } }
+        "400": { $ref: "#/components/responses/Error" }
+    post:
+      tags: [events]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EventInput" }
+      responses:
+        "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/Event" } } } }
+        "422": { $ref: "#/components/responses/Error" }
+  /events/{id}:
+    parameters: [ { $ref: "#/components/parameters/Id" } ]
+    get:
+      tags: [events]
+      responses:
+        "200": { description: Event, content: { application/json: { schema: { $ref: "#/components/schemas/Event" } } } }
+        "404": { $ref: "#/components/responses/Error" }
+    put:
+      tags: [events]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EventInput" }
+      responses:
+        "200": { description: Updated, content: { application/json: { schema: { $ref: "#/components/schemas/Event" } } } }
+        "409": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+    delete:
+      tags: [events]
+      description: Soft delete. Deleting a series master also deletes its exception instances.
+      responses:
+        "204": { description: Deleted }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /notes:
+    get:
+      tags: [notes]
+      parameters:
+        - { name: q, in: query, schema: { type: string }, description: full-text search (prefix match on every word) }
+        - { name: tag, in: query, schema: { type: string } }
+        - { name: event_id, in: query, schema: { type: string, format: uuid } }
+        - { name: limit, in: query, schema: { type: integer, default: 100, maximum: 500 } }
+        - { name: offset, in: query, schema: { type: integer, default: 0 } }
+      responses:
+        "200":
+          description: Pinned first, then most recently updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  notes: { type: array, items: { $ref: "#/components/schemas/Note" } }
+    post:
+      tags: [notes]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/NoteInput" }
+      responses:
+        "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/Note" } } } }
+        "422": { $ref: "#/components/responses/Error" }
+  /notes/{id}:
+    parameters: [ { $ref: "#/components/parameters/Id" } ]
+    get:
+      tags: [notes]
+      responses:
+        "200": { description: Note, content: { application/json: { schema: { $ref: "#/components/schemas/Note" } } } }
+        "404": { $ref: "#/components/responses/Error" }
+    put:
+      tags: [notes]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/NoteInput" }
+      responses:
+        "200": { description: Updated, content: { application/json: { schema: { $ref: "#/components/schemas/Note" } } } }
+        "409": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+    delete:
+      tags: [notes]
+      responses:
+        "204": { description: Deleted }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /sync:
+    get:
+      tags: [sync]
+      summary: Pull changes after a sequence number
+      parameters:
+        - { name: since, in: query, required: true, schema: { type: integer, format: int64 } }
+        - { name: limit, in: query, schema: { type: integer, default: 500, maximum: 1000 } }
+      responses:
+        "200":
+          description: Changed records including tombstones
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PullResponse" }
+    post:
+      tags: [sync]
+      summary: Push the client outbox
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [items]
+              properties:
+                items:
+                  type: array
+                  maxItems: 1000
+                  items: { $ref: "#/components/schemas/PushItem" }
+      responses:
+        "200":
+          description: One result per item, in order
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PushResponse" }
+
+  /devices:
+    get:
+      tags: [devices]
+      responses:
+        "200":
+          description: Devices of the user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  devices: { type: array, items: { $ref: "#/components/schemas/Device" } }
+    post:
+      tags: [devices]
+      summary: Register or update a device (idempotent on id)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DeviceInput" }
+      responses:
+        "201": { description: Device, content: { application/json: { schema: { $ref: "#/components/schemas/Device" } } } }
+  /devices/{id}:
+    parameters: [ { $ref: "#/components/parameters/Id" } ]
+    put:
+      tags: [devices]
+      summary: Update the push token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DeviceInput" }
+      responses:
+        "200": { description: Device, content: { application/json: { schema: { $ref: "#/components/schemas/Device" } } } }
+        "404": { $ref: "#/components/responses/Error" }
+    delete:
+      tags: [devices]
+      summary: Remove the device and revoke its sessions
+      responses:
+        "204": { description: Deleted }
+
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+  requestBodies:
+    Credentials:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [email, password]
+            properties:
+              email: { type: string, format: email }
+              password: { type: string, minLength: 8, maxLength: 256 }
+              device_id: { type: string, format: uuid, description: binds the session to a device }
+              device_platform: { type: string, enum: [android, macos, other] }
+              device_name: { type: string }
+  responses:
+    Tokens:
+      description: Access + refresh tokens
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              access_token: { type: string }
+              expires_at: { type: string, format: date-time }
+              refresh_token: { type: string }
+              user: { $ref: "#/components/schemas/User" }
+              device_id: { type: string, format: uuid }
+    Error:
+      description: Error envelope
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: object
+                required: [code, message]
+                properties:
+                  code:
+                    type: string
+                    enum: [bad_request, validation_error, unauthorized, forbidden, not_found, conflict, version_conflict, method_not_allowed, internal_error]
+                  message: { type: string }
+  schemas:
+    RefreshRequest:
+      type: object
+      required: [refresh_token]
+      properties:
+        refresh_token: { type: string }
+    User:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string }
+        created_at: { type: string, format: date-time }
+    SyncMeta:
+      type: object
+      properties:
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        deleted_at: { type: string, format: date-time, nullable: true }
+        version: { type: integer, format: int64 }
+        server_seq: { type: integer, format: int64 }
+    CalendarInput:
+      type: object
+      required: [name]
+      properties:
+        id: { type: string, format: uuid, description: client-generated; server generates one if omitted on POST }
+        name: { type: string, maxLength: 255 }
+        color: { type: string, pattern: "^#[0-9A-Fa-f]{6}$", default: "#3B82F6" }
+        is_default: { type: boolean, description: true moves the default here; false on the current default is ignored }
+        version: { type: integer, format: int64, description: PUT only, optimistic concurrency }
+    Calendar:
+      allOf:
+        - $ref: "#/components/schemas/CalendarInput"
+        - $ref: "#/components/schemas/SyncMeta"
+    EventInput:
+      type: object
+      required: [calendar_id, title, start_at, end_at]
+      properties:
+        id: { type: string, format: uuid }
+        calendar_id: { type: string, format: uuid }
+        title: { type: string, maxLength: 512 }
+        description: { type: string }
+        location: { type: string }
+        start_at: { type: string, format: date-time, description: UTC }
+        end_at: { type: string, format: date-time, description: UTC, >= start_at }
+        timezone: { type: string, description: IANA name, default UTC; used for recurrence expansion }
+        all_day: { type: boolean }
+        rrule: { type: string, nullable: true, description: "RFC 5545 RRULE, e.g. FREQ=WEEKLY;BYDAY=MO (the RRULE: prefix is optional)" }
+        recurrence_id: { type: string, format: uuid, nullable: true, description: master event id when this row is an exception instance }
+        original_start: { type: string, format: date-time, nullable: true, description: the occurrence this exception replaces }
+        reminders: { type: array, items: { type: integer }, description: minutes before start }
+        version: { type: integer, format: int64 }
+    Event:
+      allOf:
+        - $ref: "#/components/schemas/EventInput"
+        - $ref: "#/components/schemas/SyncMeta"
+    Occurrence:
+      allOf:
+        - $ref: "#/components/schemas/Event"
+        - type: object
+          properties:
+            occurrence_start: { type: string, format: date-time }
+            occurrence_end: { type: string, format: date-time }
+            series_id: { type: string, format: uuid }
+            is_exception: { type: boolean }
+    NoteInput:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string, maxLength: 512 }
+        body: { type: string, description: Markdown }
+        pinned: { type: boolean }
+        event_id: { type: string, format: uuid, nullable: true, description: dropped silently if the event does not exist }
+        tags: { type: array, items: { type: string }, description: normalized to lowercase, '#' stripped, de-duplicated }
+        version: { type: integer, format: int64 }
+    Note:
+      allOf:
+        - $ref: "#/components/schemas/NoteInput"
+        - $ref: "#/components/schemas/SyncMeta"
+    DeviceInput:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        platform: { type: string, enum: [android, macos, other] }
+        name: { type: string }
+        push_token: { type: string, nullable: true }
+    Device:
+      allOf:
+        - $ref: "#/components/schemas/DeviceInput"
+        - type: object
+          properties:
+            last_sync_at: { type: string, format: date-time, nullable: true }
+            created_at: { type: string, format: date-time }
+            updated_at: { type: string, format: date-time }
+            version: { type: integer, format: int64 }
+    PushItem:
+      type: object
+      required: [entity, op, id, base_version, updated_at]
+      properties:
+        entity: { type: string, enum: [calendar, event, note] }
+        op: { type: string, enum: [upsert, delete] }
+        id: { type: string, format: uuid }
+        base_version: { type: integer, format: int64, description: version the client last saw (0 for new records) }
+        updated_at: { type: string, format: date-time, description: client-side modification time, used for last-writer-wins }
+        data:
+          description: CalendarInput | EventInput | NoteInput (required for upsert)
+          oneOf:
+            - $ref: "#/components/schemas/CalendarInput"
+            - $ref: "#/components/schemas/EventInput"
+            - $ref: "#/components/schemas/NoteInput"
+    PushResult:
+      type: object
+      properties:
+        entity: { type: string }
+        id: { type: string, format: uuid }
+        status: { type: string, enum: [applied, conflict, rejected, ignored] }
+        version: { type: integer, format: int64 }
+        server_seq: { type: integer, format: int64 }
+        conflict_copy_id: { type: string, format: uuid, description: notes only, id of the "(çakışan kopya)" note }
+        current: { description: the server record when status is conflict }
+        error: { type: string }
+    PushResponse:
+      type: object
+      properties:
+        results: { type: array, items: { $ref: "#/components/schemas/PushResult" } }
+        last_seq: { type: integer, format: int64 }
+    PullResponse:
+      type: object
+      properties:
+        calendars: { type: array, items: { $ref: "#/components/schemas/Calendar" } }
+        events: { type: array, items: { $ref: "#/components/schemas/Event" } }
+        notes: { type: array, items: { $ref: "#/components/schemas/Note" } }
+        last_seq: { type: integer, format: int64, description: pass as `since` on the next pull }
+        has_more: { type: boolean }

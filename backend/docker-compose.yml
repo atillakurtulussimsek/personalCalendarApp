@@ -1,0 +1,40 @@
+# Dokploy-ready compose: API + MySQL 8.4 with a persistent volume.
+# Set the secrets in Dokploy's environment panel (or a .env next to this file).
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    command: ["mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci", "--default-time-zone=+00:00"]
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-personal_calendar}
+      MYSQL_USER: ${MYSQL_USER:-calendar}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?set MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ADDR: ":8080"
+      DATABASE_URL: ${DATABASE_URL:-${MYSQL_USER:-calendar}:${MYSQL_PASSWORD}@tcp(db:3306)/${MYSQL_DATABASE:-personal_calendar}}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET (>= 32 chars)}
+      ALLOW_REGISTRATION: ${ALLOW_REGISTRATION:-true}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      RATE_LIMIT_PER_MIN: ${RATE_LIMIT_PER_MIN:-300}
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES:-1}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "${API_PORT:-8080}:8080"
+
+volumes:
+  mysql-data:

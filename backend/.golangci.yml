@@ -1,0 +1,21 @@
+version: "2"
+run:
+  timeout: 5m
+linters:
+  default: standard
+  enable:
+    - errcheck
+    - govet
+    - staticcheck
+    - unused
+    - ineffassign
+    - misspell
+    - unconvert
+    - gocritic
+  exclusions:
+    paths:
+      - internal/db
+formatters:
+  enable:
+    - gofmt
+    - goimports
