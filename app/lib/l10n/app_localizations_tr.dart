@@ -507,4 +507,95 @@ class L10nTr extends L10n {
 
   @override
   String get liveStatusDisconnected => 'Canlı bağlantı yok';
+
+  @override
+  String get tabTasks => 'Görevler';
+
+  @override
+  String get newTask => 'Yeni görev';
+
+  @override
+  String get taskTitleHint => 'Ne yapılacak?';
+
+  @override
+  String get dueDate => 'Son tarih';
+
+  @override
+  String get noDueDate => 'Tarih yok';
+
+  @override
+  String get taskDone => 'Tamamlandı';
+
+  @override
+  String get taskOpen => 'Açık';
+
+  @override
+  String get noTasks => 'Görev yok';
+
+  @override
+  String get showDone => 'Tamamlananları göster';
+
+  @override
+  String get hideDone => 'Tamamlananları gizle';
+
+  @override
+  String get overdue => 'Gecikmiş';
+
+  @override
+  String get captureSaveTask => 'Görev olarak kaydet';
+
+  @override
+  String get linkedNote => 'Bağlı not';
+
+  @override
+  String get taskDeleted => 'Görev silindi';
+
+  @override
+  String get settingsAppearance => 'Görünüm';
+
+  @override
+  String get themeSystem => 'Sistem';
+
+  @override
+  String get themeLight => 'Açık';
+
+  @override
+  String get themeDark => 'Koyu';
+
+  @override
+  String get settingsDefaultReminder => 'Varsayılan hatırlatıcı';
+
+  @override
+  String get settingsData => 'Veri';
+
+  @override
+  String get importIcs => 'ICS dosyası içe aktar';
+
+  @override
+  String get importIcsHint =>
+      'Seçilen takvime etkinlik olarak eklenir (senkronlanır)';
+
+  @override
+  String get exportIcs => 'ICS olarak dışa aktar';
+
+  @override
+  String importDone(int count) {
+    return '$count etkinlik içe aktarıldı';
+  }
+
+  @override
+  String exportDone(String path) {
+    return 'Dışa aktarıldı: $path';
+  }
+
+  @override
+  String importFailed(String reason) {
+    return 'İçe aktarma başarısız: $reason';
+  }
+
+  @override
+  String get chooseCalendar => 'Takvim seç';
+
+  @override
+  String get none => 'Yok';
 }

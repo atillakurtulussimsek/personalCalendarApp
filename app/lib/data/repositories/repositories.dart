@@ -114,6 +114,27 @@ class CalendarRepository extends LocalRepository {
     return c;
   }
 
+  /// Imports ICS text into a regular (synced) calendar; returns the number of events created.
+  Future<int> importIcs(String calendarId, String icsText) async {
+    final parsed = parseIcs(icsText);
+    var n = 0;
+    for (final e in parsed) {
+      await EventRepository(db, sync).create(
+        calendarId: calendarId,
+        title: e.summary.isEmpty ? 'Etkinlik' : e.summary,
+        description: e.description,
+        location: e.location,
+        startAt: e.start,
+        endAt: e.end,
+        timezone: e.timezone,
+        allDay: e.allDay,
+        rrule: e.rrule,
+      );
+      n++;
+    }
+    return n;
+  }
+
   /// Replaces the events of a subscription with the parsed feed contents.
   Future<int> applyFeed(Calendar sub, String icsText) async {
     final events = parseIcs(icsText);
@@ -469,5 +490,50 @@ class NoteRepository extends LocalRepository {
     final t = now();
     await (db.update(db.notes)..where((x) => x.id.equals(id))).write(NotesCompanion(deletedAt: Value(t), updatedAt: Value(t)));
     await enqueue('note', 'delete', id, n.version, t);
+  }
+}
+
+class TaskRepository extends LocalRepository {
+  TaskRepository(super.db, super.sync);
+
+  /// Open tasks first (by due date, undated last), then done tasks by completion.
+  Stream<List<Task>> watchAll({bool includeDone = true}) => (db.select(db.tasks)
+        ..where((t) => includeDone ? t.deletedAt.isNull() : (t.deletedAt.isNull() & t.done.equals(false)))
+        ..orderBy([
+          (t) => OrderingTerm.asc(t.done),
+          (t) => OrderingTerm(expression: t.dueAt.isNull(), mode: OrderingMode.asc),
+          (t) => OrderingTerm.asc(t.dueAt),
+          (t) => OrderingTerm.desc(t.updatedAt),
+        ]))
+      .watch();
+
+  Future<Task?> get(String id) => (db.select(db.tasks)..where((t) => t.id.equals(id))).getSingleOrNull();
+
+  Future<Task> create({required String title, DateTime? dueAt, String? noteId}) async {
+    final t = now();
+    final task = Task(id: newId(), title: title.trim(), dueAt: dueAt?.toUtc(), done: false, noteId: noteId, createdAt: t, updatedAt: t, version: 0, serverSeq: 0);
+    await db.into(db.tasks).insert(task);
+    await enqueue('task', 'upsert', task.id, 0, t, taskToPushData(task));
+    return task;
+  }
+
+  Future<void> save(Task task) async {
+    final t = now();
+    final updated = task.copyWith(updatedAt: t, title: task.title.trim());
+    await db.update(db.tasks).replace(updated);
+    await enqueue('task', 'upsert', task.id, task.version, t, taskToPushData(updated));
+  }
+
+  Future<void> setDone(String id, bool done) async {
+    final task = await get(id);
+    if (task != null) await save(task.copyWith(done: done));
+  }
+
+  Future<void> remove(String id) async {
+    final task = await get(id);
+    if (task == null) return;
+    final t = now();
+    await (db.update(db.tasks)..where((x) => x.id.equals(id))).write(TasksCompanion(deletedAt: Value(t), updatedAt: Value(t)));
+    await enqueue('task', 'delete', id, task.version, t);
   }
 }

@@ -63,6 +63,7 @@ class PullResponse {
       : calendars = _list(j['calendars']),
         events = _list(j['events']),
         notes = _list(j['notes']),
+        tasks = _list(j['tasks']),
         lastSeq = (j['last_seq'] as num).toInt(),
         hasMore = j['has_more'] as bool? ?? false;
 
@@ -72,6 +73,7 @@ class PullResponse {
   final List<Map<String, dynamic>> calendars;
   final List<Map<String, dynamic>> events;
   final List<Map<String, dynamic>> notes;
+  final List<Map<String, dynamic>> tasks;
   final int lastSeq;
   final bool hasMore;
 }

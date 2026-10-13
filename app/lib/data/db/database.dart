@@ -10,7 +10,7 @@ part 'database.g.dart';
 const kLastSeq = 'last_seq';
 const kLastSyncAt = 'last_sync_at';
 
-@DriftDatabase(tables: [Calendars, Events, Notes, Outbox, SyncState])
+@DriftDatabase(tables: [Calendars, Events, Notes, Tasks, Outbox, SyncState])
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
@@ -21,7 +21,7 @@ class AppDatabase extends _$AppDatabase {
         ));
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -34,6 +34,9 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(calendars, calendars.source);
             await m.addColumn(calendars, calendars.icsUrl);
             await m.addColumn(calendars, calendars.lastFetchedAt);
+          }
+          if (from < 3) {
+            await m.createTable(tasks);
           }
         },
         beforeOpen: (details) async {

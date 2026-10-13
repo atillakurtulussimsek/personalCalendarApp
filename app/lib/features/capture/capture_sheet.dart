@@ -50,6 +50,26 @@ class _CaptureSheetState extends ConsumerState<CaptureSheet> {
 
   void _reparse() => setState(() => _result = _text.text.trim().isEmpty ? null : _parser.parse(_text.text));
 
+  Future<void> _saveTask() async {
+    final r = _result;
+    if (r == null || _saving) return;
+    setState(() => _saving = true);
+    try {
+      await ref.read(taskRepositoryProvider).create(
+            title: r.title.isEmpty ? _text.text.trim() : r.title,
+            dueAt: r.isEvent && !r.allDay ? r.start : (r.isEvent ? r.start!.add(const Duration(hours: 9)) : null),
+          );
+      widget.onSaved?.call();
+      if (mounted) {
+        final l = L10n.of(context);
+        Navigator.of(context).pop();
+        ScaffoldMessenger.maybeOf(context)?.showSnackBar(SnackBar(content: Text(l.captureSaved), duration: const Duration(seconds: 1)));
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
   Future<void> _save({bool forceNote = false}) async {
     final r = _result;
     if (r == null || _saving) return;
@@ -162,6 +182,8 @@ class _CaptureSheetState extends ConsumerState<CaptureSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
+              if (r != null)
+                TextButton(onPressed: _saving ? null : _saveTask, child: Text(l.captureSaveTask)),
               if (r != null && r.isEvent)
                 TextButton(onPressed: _saving ? null : () => _save(forceNote: true), child: Text(l.captureSaveNote)),
               const SizedBox(width: 8),

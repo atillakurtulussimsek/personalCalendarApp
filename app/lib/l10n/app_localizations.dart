@@ -1022,6 +1022,174 @@ abstract class L10n {
   /// In tr, this message translates to:
   /// **'Canlı bağlantı yok'**
   String get liveStatusDisconnected;
+
+  /// No description provided for @tabTasks.
+  ///
+  /// In tr, this message translates to:
+  /// **'Görevler'**
+  String get tabTasks;
+
+  /// No description provided for @newTask.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni görev'**
+  String get newTask;
+
+  /// No description provided for @taskTitleHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ne yapılacak?'**
+  String get taskTitleHint;
+
+  /// No description provided for @dueDate.
+  ///
+  /// In tr, this message translates to:
+  /// **'Son tarih'**
+  String get dueDate;
+
+  /// No description provided for @noDueDate.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih yok'**
+  String get noDueDate;
+
+  /// No description provided for @taskDone.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlandı'**
+  String get taskDone;
+
+  /// No description provided for @taskOpen.
+  ///
+  /// In tr, this message translates to:
+  /// **'Açık'**
+  String get taskOpen;
+
+  /// No description provided for @noTasks.
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev yok'**
+  String get noTasks;
+
+  /// No description provided for @showDone.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlananları göster'**
+  String get showDone;
+
+  /// No description provided for @hideDone.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlananları gizle'**
+  String get hideDone;
+
+  /// No description provided for @overdue.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gecikmiş'**
+  String get overdue;
+
+  /// No description provided for @captureSaveTask.
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev olarak kaydet'**
+  String get captureSaveTask;
+
+  /// No description provided for @linkedNote.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlı not'**
+  String get linkedNote;
+
+  /// No description provided for @taskDeleted.
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev silindi'**
+  String get taskDeleted;
+
+  /// No description provided for @settingsAppearance.
+  ///
+  /// In tr, this message translates to:
+  /// **'Görünüm'**
+  String get settingsAppearance;
+
+  /// No description provided for @themeSystem.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sistem'**
+  String get themeSystem;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In tr, this message translates to:
+  /// **'Açık'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In tr, this message translates to:
+  /// **'Koyu'**
+  String get themeDark;
+
+  /// No description provided for @settingsDefaultReminder.
+  ///
+  /// In tr, this message translates to:
+  /// **'Varsayılan hatırlatıcı'**
+  String get settingsDefaultReminder;
+
+  /// No description provided for @settingsData.
+  ///
+  /// In tr, this message translates to:
+  /// **'Veri'**
+  String get settingsData;
+
+  /// No description provided for @importIcs.
+  ///
+  /// In tr, this message translates to:
+  /// **'ICS dosyası içe aktar'**
+  String get importIcs;
+
+  /// No description provided for @importIcsHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Seçilen takvime etkinlik olarak eklenir (senkronlanır)'**
+  String get importIcsHint;
+
+  /// No description provided for @exportIcs.
+  ///
+  /// In tr, this message translates to:
+  /// **'ICS olarak dışa aktar'**
+  String get exportIcs;
+
+  /// No description provided for @importDone.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} etkinlik içe aktarıldı'**
+  String importDone(int count);
+
+  /// No description provided for @exportDone.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dışa aktarıldı: {path}'**
+  String exportDone(String path);
+
+  /// No description provided for @importFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'İçe aktarma başarısız: {reason}'**
+  String importFailed(String reason);
+
+  /// No description provided for @chooseCalendar.
+  ///
+  /// In tr, this message translates to:
+  /// **'Takvim seç'**
+  String get chooseCalendar;
+
+  /// No description provided for @none.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yok'**
+  String get none;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

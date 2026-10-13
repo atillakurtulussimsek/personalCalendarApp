@@ -17,6 +17,7 @@ const (
 	EntityCalendar = "calendar"
 	EntityEvent    = "event"
 	EntityNote     = "note"
+	EntityTask     = "task"
 )
 
 // Operations accepted by the sync protocol.
@@ -66,6 +67,7 @@ type PullResponse struct {
 	Calendars []model.Calendar `json:"calendars"`
 	Events    []model.Event    `json:"events"`
 	Notes     []model.Note     `json:"notes"`
+	Tasks     []model.Task     `json:"tasks"`
 	LastSeq   int64            `json:"last_seq"`
 	HasMore   bool             `json:"has_more"`
 }
@@ -75,7 +77,7 @@ func (s *Store) Pull(ctx context.Context, userID string, since int64, limit int3
 	if limit <= 0 || limit > 1000 {
 		limit = 500
 	}
-	resp := PullResponse{Calendars: []model.Calendar{}, Events: []model.Event{}, Notes: []model.Note{}}
+	resp := PullResponse{Calendars: []model.Calendar{}, Events: []model.Event{}, Notes: []model.Note{}, Tasks: []model.Task{}}
 	err := s.tx(ctx, func(q *db.Queries) error {
 		cals, err := q.PullCalendars(ctx, db.PullCalendarsParams{UserID: userID, ServerSeq: since, Limit: limit})
 		if err != nil {
@@ -86,6 +88,10 @@ func (s *Store) Pull(ctx context.Context, userID string, since int64, limit int3
 			return err
 		}
 		nts, err := q.PullNotes(ctx, db.PullNotesParams{UserID: userID, ServerSeq: since, Limit: limit})
+		if err != nil {
+			return err
+		}
+		tks, err := q.PullTasks(ctx, db.PullTasksParams{UserID: userID, ServerSeq: since, Limit: limit})
 		if err != nil {
 			return err
 		}
@@ -109,6 +115,10 @@ func (s *Store) Pull(ctx context.Context, userID string, since int64, limit int3
 			full = true
 			cutoff = min(cutoff, nts[len(nts)-1].ServerSeq)
 		}
+		if int32(len(tks)) == limit {
+			full = true
+			cutoff = min(cutoff, tks[len(tks)-1].ServerSeq)
+		}
 		for _, r := range cals {
 			if r.ServerSeq <= cutoff {
 				resp.Calendars = append(resp.Calendars, model.CalendarFromRow(r))
@@ -122,6 +132,11 @@ func (s *Store) Pull(ctx context.Context, userID string, since int64, limit int3
 		for _, r := range nts {
 			if r.ServerSeq <= cutoff {
 				resp.Notes = append(resp.Notes, model.NoteFromRow(r))
+			}
+		}
+		for _, r := range tks {
+			if r.ServerSeq <= cutoff {
+				resp.Tasks = append(resp.Tasks, model.TaskFromRow(r))
 			}
 		}
 		resp.LastSeq = cutoff
@@ -181,6 +196,8 @@ func (s *Store) applyItem(ctx context.Context, q *db.Queries, userID string, it 
 		return s.applyEvent(ctx, q, userID, it)
 	case EntityNote:
 		return s.applyNote(ctx, q, userID, it)
+	case EntityTask:
+		return s.applyTask(ctx, q, userID, it)
 	default:
 		return PushResult{}, invalid("unknown entity %q", it.Entity)
 	}

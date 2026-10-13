@@ -102,3 +102,26 @@ Map<String, dynamic> noteToPushData(Note n) => {
 
 List<String> noteTags(Note n) => (jsonDecode(n.tags) as List<dynamic>).cast<String>();
 List<int> eventReminders(Event e) => (jsonDecode(e.reminders) as List<dynamic>).cast<int>();
+
+// --- tasks ------------------------------------------------------------------
+
+TasksCompanion taskFromJson(Map<String, dynamic> j) => TasksCompanion(
+      id: Value(j['id'] as String),
+      title: Value(j['title'] as String? ?? ''),
+      dueAt: Value(_dtn(j['due_at'])),
+      done: Value(j['done'] as bool? ?? false),
+      noteId: Value(j['note_id'] as String?),
+      createdAt: Value(_dt(j['created_at'])),
+      updatedAt: Value(_dt(j['updated_at'])),
+      deletedAt: Value(_dtn(j['deleted_at'])),
+      version: Value((j['version'] as num?)?.toInt() ?? 0),
+      serverSeq: Value((j['server_seq'] as num?)?.toInt() ?? 0),
+    );
+
+Map<String, dynamic> taskToPushData(Task t) => {
+      'title': t.title,
+      'due_at': _ison(t.dueAt),
+      'done': t.done,
+      'note_id': t.noteId,
+      'created_at': _iso(t.createdAt),
+    };

@@ -18,7 +18,16 @@ docs/      mimari, API (OpenAPI), karar günlüğü
 | 3 | Takvim derinliği: hafta/gün, sürükle-bırak, tekrar kuralları, istisnalar, ICS abonelik | ✅ |
 | 4 | Anlık yakalama: Türkçe ayrıştırıcı, Android widget/tile/paylaş/bildirim/kısayol, macOS menü çubuğu + global kısayol | ✅ |
 | 5 | Bildirimler ve canlı senkron: yerel hatırlatıcılar, WebSocket, FCM, WorkManager | ✅ |
-| 6 | Cilalama: görevler, ICS, yedekleme, CalDAV (ops.) | |
+| 6 | Cilalama: görevler, ICS içe/dışa aktarma, yedekleme, tema ayarı | ✅ (CalDAV yapılmadı) |
+
+## Build
+
+```bash
+cd app && flutter build apk --release        # Android
+cd app && flutter build macos --release      # macOS (Xcode + CocoaPods gerekir)
+```
+
+Dokploy'a dağıtım: [backend/README.md](backend/README.md#deploy-to-dokploy).
 
 ## Hızlı başlangıç (backend)
 

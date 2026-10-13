@@ -72,6 +72,20 @@ type Note struct {
 	ServerSeq int64      `json:"server_seq"`
 }
 
+// Task is the API representation of a to-do item.
+type Task struct {
+	ID        string     `json:"id"`
+	Title     string     `json:"title"`
+	DueAt     *time.Time `json:"due_at"`
+	Done      bool       `json:"done"`
+	NoteID    *string    `json:"note_id"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	DeletedAt *time.Time `json:"deleted_at"`
+	Version   int64      `json:"version"`
+	ServerSeq int64      `json:"server_seq"`
+}
+
 // Device is the API representation of a registered device.
 type Device struct {
 	ID         string     `json:"id"`
@@ -160,6 +174,15 @@ func NoteFromRow(r db.Note) Note {
 	}
 	return Note{
 		ID: r.ID, Title: r.Title, Body: r.Body, Pinned: r.Pinned, EventID: nullString(r.EventID), Tags: tags,
+		CreatedAt: r.CreatedAt.UTC(), UpdatedAt: r.UpdatedAt.UTC(), DeletedAt: nullTime(r.DeletedAt),
+		Version: r.Version, ServerSeq: r.ServerSeq,
+	}
+}
+
+// TaskFromRow converts a sqlc row.
+func TaskFromRow(r db.Task) Task {
+	return Task{
+		ID: r.ID, Title: r.Title, DueAt: nullTime(r.DueAt), Done: r.Done, NoteID: nullString(r.NoteID),
 		CreatedAt: r.CreatedAt.UTC(), UpdatedAt: r.UpdatedAt.UTC(), DeletedAt: nullTime(r.DeletedAt),
 		Version: r.Version, ServerSeq: r.ServerSeq,
 	}

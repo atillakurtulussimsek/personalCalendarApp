@@ -15,6 +15,7 @@ tags:
   - name: calendars
   - name: events
   - name: notes
+  - name: tasks
   - name: sync
   - name: devices
 
@@ -127,6 +128,68 @@ paths:
         "204": { description: Deleted }
         "404": { $ref: "#/components/responses/Error" }
         "422": { $ref: "#/components/responses/Error" }
+
+  /calendars/{id}/export.ics:
+    parameters: [ { $ref: "#/components/parameters/Id" } ]
+    get:
+      tags: [calendars]
+      summary: Export one calendar as iCalendar
+      responses:
+        "200": { description: text/calendar, content: { text/calendar: { schema: { type: string } } } }
+        "404": { $ref: "#/components/responses/Error" }
+  /export.ics:
+    get:
+      tags: [calendars]
+      summary: Export every event as iCalendar
+      responses:
+        "200": { description: text/calendar, content: { text/calendar: { schema: { type: string } } } }
+
+  /tasks:
+    get:
+      tags: [tasks]
+      parameters:
+        - { name: limit, in: query, schema: { type: integer, default: 200 } }
+        - { name: offset, in: query, schema: { type: integer, default: 0 } }
+      responses:
+        "200":
+          description: Open tasks first, then by due date
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tasks: { type: array, items: { $ref: "#/components/schemas/Task" } }
+    post:
+      tags: [tasks]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TaskInput" }
+      responses:
+        "201": { description: Created, content: { application/json: { schema: { $ref: "#/components/schemas/Task" } } } }
+        "422": { $ref: "#/components/responses/Error" }
+  /tasks/{id}:
+    parameters: [ { $ref: "#/components/parameters/Id" } ]
+    get:
+      tags: [tasks]
+      responses:
+        "200": { description: Task, content: { application/json: { schema: { $ref: "#/components/schemas/Task" } } } }
+        "404": { $ref: "#/components/responses/Error" }
+    put:
+      tags: [tasks]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TaskInput" }
+      responses:
+        "200": { description: Updated, content: { application/json: { schema: { $ref: "#/components/schemas/Task" } } } }
+        "409": { $ref: "#/components/responses/Error" }
+    delete:
+      tags: [tasks]
+      responses:
+        "204": { description: Deleted }
 
   /events:
     get:
@@ -453,6 +516,20 @@ components:
       allOf:
         - $ref: "#/components/schemas/NoteInput"
         - $ref: "#/components/schemas/SyncMeta"
+    TaskInput:
+      type: object
+      required: [title]
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string, maxLength: 512 }
+        due_at: { type: string, format: date-time, nullable: true }
+        done: { type: boolean }
+        note_id: { type: string, format: uuid, nullable: true, description: dropped silently if the note does not exist }
+        version: { type: integer, format: int64 }
+    Task:
+      allOf:
+        - $ref: "#/components/schemas/TaskInput"
+        - $ref: "#/components/schemas/SyncMeta"
     DeviceInput:
       type: object
       properties:
@@ -473,7 +550,7 @@ components:
       type: object
       required: [entity, op, id, base_version, updated_at]
       properties:
-        entity: { type: string, enum: [calendar, event, note] }
+        entity: { type: string, enum: [calendar, event, note, task] }
         op: { type: string, enum: [upsert, delete] }
         id: { type: string, format: uuid }
         base_version: { type: integer, format: int64, description: version the client last saw (0 for new records) }
@@ -484,6 +561,7 @@ components:
             - $ref: "#/components/schemas/CalendarInput"
             - $ref: "#/components/schemas/EventInput"
             - $ref: "#/components/schemas/NoteInput"
+            - $ref: "#/components/schemas/TaskInput"
     PushResult:
       type: object
       properties:
@@ -506,5 +584,6 @@ components:
         calendars: { type: array, items: { $ref: "#/components/schemas/Calendar" } }
         events: { type: array, items: { $ref: "#/components/schemas/Event" } }
         notes: { type: array, items: { $ref: "#/components/schemas/Note" } }
+        tasks: { type: array, items: { $ref: "#/components/schemas/Task" } }
         last_seq: { type: integer, format: int64, description: pass as `since` on the next pull }
         has_more: { type: boolean }

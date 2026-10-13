@@ -1,10 +1,14 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
 
+import '../../core/ics.dart';
+import '../../data/db/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../platform/app_intents.dart';
 import '../../platform/desktop_integration.dart';
@@ -56,6 +60,57 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Future<void> _set(String key, String value) => ref.read(databaseProvider).setState(key, value);
 
+  Future<void> _importIcs() async {
+    final l = L10n.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final calendars = (ref.read(calendarsProvider).value ?? const <Calendar>[]).where((c) => c.source == 'local').toList();
+    if (calendars.isEmpty) return;
+    final calId = await showDialog<String>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: Text(l.chooseCalendar),
+        children: [for (final c in calendars) SimpleDialogOption(onPressed: () => Navigator.pop(ctx, c.id), child: Text(c.name))],
+      ),
+    );
+    if (calId == null) return;
+    try {
+      final picked = await FilePicker.pickFiles(type: FileType.custom, allowedExtensions: ['ics']);
+      if (picked.isEmpty) return;
+      final text = await picked.single.xFile.readAsString();
+      final n = await ref.read(calendarRepositoryProvider).importIcs(calId, text);
+      messenger.showSnackBar(SnackBar(content: Text(l.importDone(n))));
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(l.importFailed(e.toString()))));
+    }
+  }
+
+  Future<void> _exportIcs() async {
+    final l = L10n.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final db = ref.read(databaseProvider);
+    final cals = {for (final c in await db.select(db.calendars).get()) c.id: c};
+    final rows = await (db.select(db.events)..where((t) => t.deletedAt.isNull())).get();
+    final events = rows.where((e) => cals[e.calendarId]?.source == 'local' && e.recurrenceId == null).map((e) => IcsEvent(
+          uid: e.id,
+          summary: e.title,
+          description: e.description,
+          location: e.location,
+          start: e.startAt,
+          end: e.endAt,
+          allDay: e.allDay,
+          rrule: e.rrule,
+          timezone: e.timezone,
+        ));
+    final text = writeIcs(events);
+    try {
+      final uri = await FilePicker.saveFile(
+          fileName: 'takvim.ics', bytes: Uint8List.fromList(utf8.encode(text)), mimeType: 'text/calendar', type: FileType.custom, allowedExtensions: ['ics']);
+      if (uri != null) messenger.showSnackBar(SnackBar(content: Text(l.exportDone(uri.path))));
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(l.importFailed(e.toString()))));
+    }
+  }
+
   Future<void> _recordHotKey() async {
     final l = L10n.of(context);
     final hk = await showDialog<HotKey?>(
@@ -77,6 +132,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         children: [
           ListTile(leading: const Icon(Icons.person_outline), title: Text(l.settingsAccount), subtitle: Text(_email)),
           ListTile(leading: const Icon(Icons.dns_outlined), title: Text(l.settingsServer), subtitle: Text(_server)),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.palette_outlined),
+            title: Text(l.settingsAppearance),
+            trailing: SegmentedButton<ThemeMode>(
+              segments: [
+                ButtonSegment(value: ThemeMode.system, label: Text(l.themeSystem)),
+                ButtonSegment(value: ThemeMode.light, label: Text(l.themeLight)),
+                ButtonSegment(value: ThemeMode.dark, label: Text(l.themeDark)),
+              ],
+              selected: {ref.watch(themeModeProvider)},
+              onSelectionChanged: (s) => ref.read(themeModeProvider.notifier).set(s.first),
+              showSelectedIcon: false,
+              style: const ButtonStyle(visualDensity: VisualDensity.compact),
+            ),
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.upload_file_outlined),
+            title: Text(l.importIcs),
+            subtitle: Text(l.importIcsHint),
+            onTap: _importIcs,
+          ),
+          ListTile(
+            leading: const Icon(Icons.download_outlined),
+            title: Text(l.exportIcs),
+            onTap: _exportIcs,
+          ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.notifications_outlined),

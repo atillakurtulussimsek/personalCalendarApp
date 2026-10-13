@@ -241,5 +241,54 @@
   "permissionDialogAllow": "İzin ver",
   "permissionDialogLater": "Sonra",
   "liveStatusConnected": "Canlı",
-  "liveStatusDisconnected": "Canlı bağlantı yok"
+  "liveStatusDisconnected": "Canlı bağlantı yok",
+  "tabTasks": "Görevler",
+  "newTask": "Yeni görev",
+  "taskTitleHint": "Ne yapılacak?",
+  "dueDate": "Son tarih",
+  "noDueDate": "Tarih yok",
+  "taskDone": "Tamamlandı",
+  "taskOpen": "Açık",
+  "noTasks": "Görev yok",
+  "showDone": "Tamamlananları göster",
+  "hideDone": "Tamamlananları gizle",
+  "overdue": "Gecikmiş",
+  "captureSaveTask": "Görev olarak kaydet",
+  "linkedNote": "Bağlı not",
+  "taskDeleted": "Görev silindi",
+  "settingsAppearance": "Görünüm",
+  "themeSystem": "Sistem",
+  "themeLight": "Açık",
+  "themeDark": "Koyu",
+  "settingsDefaultReminder": "Varsayılan hatırlatıcı",
+  "settingsData": "Veri",
+  "importIcs": "ICS dosyası içe aktar",
+  "importIcsHint": "Seçilen takvime etkinlik olarak eklenir (senkronlanır)",
+  "exportIcs": "ICS olarak dışa aktar",
+  "importDone": "{count} etkinlik içe aktarıldı",
+  "@importDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exportDone": "Dışa aktarıldı: {path}",
+  "@exportDone": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "importFailed": "İçe aktarma başarısız: {reason}",
+  "@importFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "chooseCalendar": "Takvim seç",
+  "none": "Yok"
 }

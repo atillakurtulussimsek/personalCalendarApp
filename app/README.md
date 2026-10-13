@@ -116,6 +116,16 @@ lib/features/notes             list + FTS search, Markdown editor with autosave
 * `platform/background_sync.dart`: WorkManager periodic sync every 15 min (Android),
   network-constrained, shares the SQLite database across isolates.
 
+## Tasks, import/export, settings (phase 6)
+
+* Tasks tab: open tasks first (overdue in red), done tasks collapsible, swipe to delete,
+  due date and linked note; synced like every other entity (`entity: task`).
+  Quick capture has "Görev olarak kaydet".
+* Settings: theme (system/light/dark), ICS import into a synced calendar (`file_picker`),
+  ICS export of all local calendars (RRULE masters included).
+* Backend: `GET /export.ics`, `GET /calendars/{id}/export.ics`, nightly `mysqldump` service
+  in docker-compose (`backend/scripts/backup.sh`, 14-day retention).
+
 ## Sync behaviour
 
 * Every write goes to SQLite first and appends to the outbox (one row per record; later

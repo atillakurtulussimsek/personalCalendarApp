@@ -12,6 +12,7 @@ import '../../platform/desktop_integration.dart';
 import '../calendar/event_editor_screen.dart';
 import '../capture/capture_sheet.dart';
 import '../settings/settings_screen.dart';
+import '../tasks/tasks_screen.dart';
 import '../../providers.dart';
 import '../calendar/calendar_screen.dart';
 import '../calendar/calendars_screen.dart';
@@ -31,6 +32,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
   int _index = 0;
   final _calendarKey = GlobalKey<CalendarScreenState>();
   final _notesKey = GlobalKey<NotesScreenState>();
+  final _tasksKey = GlobalKey<TasksScreenState>();
 
   StreamSubscription<AppIntent>? _intents;
 
@@ -136,10 +138,13 @@ class _HomeShellState extends ConsumerState<HomeShell> {
   }
 
   void _newItem() {
-    if (_index == 0) {
-      _calendarKey.currentState?.createEvent();
-    } else {
-      Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const NoteEditorScreen()));
+    switch (_index) {
+      case 0:
+        _calendarKey.currentState?.createEvent();
+      case 1:
+        Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const NoteEditorScreen()));
+      default:
+        _tasksKey.currentState?.createTask();
     }
   }
 
@@ -150,15 +155,17 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     final pages = [
       CalendarScreen(key: _calendarKey),
       NotesScreen(key: _notesKey),
+      TasksScreen(key: _tasksKey),
     ];
     final destinations = [
       (Icons.calendar_month_outlined, Icons.calendar_month, l.tabCalendar),
       (Icons.notes_outlined, Icons.notes, l.tabNotes),
+      (Icons.check_circle_outline, Icons.check_circle, l.tabTasks),
     ];
 
     final body = Scaffold(
       appBar: AppBar(
-        title: Text(_index == 0 ? l.tabCalendar : l.tabNotes),
+        title: Text([l.tabCalendar, l.tabNotes, l.tabTasks][_index]),
         actions: [
           IconButton(tooltip: '${l.quickCapture} (⌘K)', icon: const Icon(Icons.bolt), onPressed: () => _capture()),
           const SyncIndicator(),
@@ -180,7 +187,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       floatingActionButton: GestureDetector(
         onLongPress: () => _capture(),
         child: FloatingActionButton(
-          tooltip: _index == 0 ? l.newEvent : l.newNote,
+          tooltip: [l.newEvent, l.newNote, l.newTask][_index],
           onPressed: _newItem,
           child: const Icon(Icons.add),
         ),
@@ -223,6 +230,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         },
         const SingleActivator(LogicalKeyboardKey.digit1, meta: true): () => setState(() => _index = 0),
         const SingleActivator(LogicalKeyboardKey.digit2, meta: true): () => setState(() => _index = 1),
+        const SingleActivator(LogicalKeyboardKey.digit3, meta: true): () => setState(() => _index = 2),
         const SingleActivator(LogicalKeyboardKey.keyR, meta: true): () => ref.read(syncServiceProvider).sync(),
         const SingleActivator(LogicalKeyboardKey.keyK, meta: true): () => _capture(),
         const SingleActivator(LogicalKeyboardKey.keyK, control: true): () => _capture(),

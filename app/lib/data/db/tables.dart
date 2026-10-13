@@ -58,6 +58,16 @@ class Notes extends Table with SyncColumns {
   Set<Column> get primaryKey => {id};
 }
 
+class Tasks extends Table with SyncColumns {
+  TextColumn get title => text()();
+  DateTimeColumn get dueAt => dateTime().nullable()();
+  BoolColumn get done => boolean().withDefault(const Constant(false))();
+  TextColumn get noteId => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 /// Pending local changes waiting to be pushed. One row per record: a newer
 /// change for the same record replaces the older row (keeping base version).
 class Outbox extends Table {

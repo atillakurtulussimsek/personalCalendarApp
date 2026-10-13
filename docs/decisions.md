@@ -169,3 +169,20 @@ device that caused the change.
 Only the next 14 days (max 400 alarms) are scheduled, because Android limits pending alarms
 (~500 per app) and recurring events are unbounded. The window slides every 6 hours and after
 each change; ids are deterministic hashes so an unchanged occurrence is never re-scheduled.
+
+## 2026-10-13 — CalDAV layer not implemented
+
+**Decision:** The optional CalDAV server (for iPhone / Thunderbird) is left out of phase 6.
+ICS export + subscription URLs cover read-only interop; a full CalDAV implementation (WebDAV
+PROPFIND/REPORT, ETags, calendar-query filters) is a project of its own.
+
+## 2026-10-13 — Backups via a compose sidecar
+
+`mysqldump --single-transaction` runs in a `mysql:8.4` sidecar every 24 h into the `backups`
+volume with 14-day retention. No cron daemon in the API image; the loop script is the cron.
+
+## 2026-10-13 — ICS import is client-side
+
+Imported files are parsed on the device (`core/ics.dart`) and created as ordinary events so
+they flow through the outbox like manual entries. Exceptions (RECURRENCE-ID) in imported
+files are ignored for now.

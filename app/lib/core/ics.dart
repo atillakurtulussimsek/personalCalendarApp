@@ -136,3 +136,64 @@ IcsEvent? _toEvent(Map<String, _Prop> p) {
     timezone: zone,
   );
 }
+
+// --- writer ------------------------------------------------------------------
+
+String _icsTime(DateTime d) {
+  final u = d.toUtc();
+  String p(int n) => n.toString().padLeft(2, '0');
+  return '${u.year}${p(u.month)}${p(u.day)}T${p(u.hour)}${p(u.minute)}${p(u.second)}Z';
+}
+
+String _icsDate(DateTime d) {
+  final u = d.toUtc();
+  String p(int n) => n.toString().padLeft(2, '0');
+  return '${u.year}${p(u.month)}${p(u.day)}';
+}
+
+String _escape(String s) => s.replaceAll(r'\', r'\\').replaceAll(';', r'\;').replaceAll(',', r'\,').replaceAll('\n', r'\n');
+
+String _fold(String line) {
+  final units = utf8.encode(line);
+  if (units.length <= 75) return '$line\r\n';
+  final out = StringBuffer();
+  var start = 0;
+  var first = true;
+  while (start < units.length) {
+    var end = start + (first ? 75 : 74);
+    if (end > units.length) end = units.length;
+    while (end < units.length && end > start && (units[end] & 0xC0) == 0x80) {
+      end--;
+    }
+    out.write(first ? '' : ' ');
+    out.write(utf8.decode(units.sublist(start, end)));
+    out.write('\r\n');
+    start = end;
+    first = false;
+  }
+  return out.toString();
+}
+
+/// Serialises events (drift rows) as an iCalendar document.
+String writeIcs(Iterable<IcsEvent> events) {
+  final b = StringBuffer('BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Personal Calendar//TR\r\nCALSCALE:GREGORIAN\r\n');
+  for (final e in events) {
+    b.write('BEGIN:VEVENT\r\n');
+    b.write(_fold('UID:${e.uid}'));
+    b.write(_fold('DTSTAMP:${_icsTime(DateTime.now())}'));
+    if (e.allDay) {
+      b.write(_fold('DTSTART;VALUE=DATE:${_icsDate(e.start)}'));
+      b.write(_fold('DTEND;VALUE=DATE:${_icsDate(e.end)}'));
+    } else {
+      b.write(_fold('DTSTART:${_icsTime(e.start)}'));
+      b.write(_fold('DTEND:${_icsTime(e.end)}'));
+    }
+    b.write(_fold('SUMMARY:${_escape(e.summary)}'));
+    if (e.description.isNotEmpty) b.write(_fold('DESCRIPTION:${_escape(e.description)}'));
+    if (e.location.isNotEmpty) b.write(_fold('LOCATION:${_escape(e.location)}'));
+    if (e.rrule != null) b.write(_fold('RRULE:${e.rrule}'));
+    b.write('END:VEVENT\r\n');
+  }
+  b.write('END:VCALENDAR\r\n');
+  return b.toString();
+}

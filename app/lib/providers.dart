@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -61,6 +62,8 @@ final calendarRepositoryProvider =
     Provider<CalendarRepository>((ref) => CalendarRepository(ref.watch(databaseProvider), ref.watch(syncServiceProvider)));
 final eventRepositoryProvider =
     Provider<EventRepository>((ref) => EventRepository(ref.watch(databaseProvider), ref.watch(syncServiceProvider)));
+final taskRepositoryProvider =
+    Provider<TaskRepository>((ref) => TaskRepository(ref.watch(databaseProvider), ref.watch(syncServiceProvider)));
 final icsServiceProvider = Provider<IcsService>((ref) => IcsService(ref.watch(calendarRepositoryProvider)));
 final noteRepositoryProvider =
     Provider<NoteRepository>((ref) => NoteRepository(ref.watch(databaseProvider), ref.watch(syncServiceProvider)));
@@ -208,3 +211,30 @@ final desktopIntegrationProvider = Provider<DesktopIntegration>((ref) {
 
 final calendarsProvider = StreamProvider<List<Calendar>>((ref) => ref.watch(calendarRepositoryProvider).watchAll());
 final notesProvider = StreamProvider<List<Note>>((ref) => ref.watch(noteRepositoryProvider).watchAll());
+final tasksProvider = StreamProvider<List<Task>>((ref) => ref.watch(taskRepositoryProvider).watchAll());
+
+/// Theme mode from the device-local settings ("system" | "light" | "dark").
+class ThemeModeNotifier extends Notifier<ThemeMode> {
+  static const key = 'setting.theme_mode';
+
+  @override
+  ThemeMode build() {
+    ref.read(databaseProvider).getState(key).then((v) {
+      if (v != null) state = _parse(v);
+    });
+    return ThemeMode.system;
+  }
+
+  static ThemeMode _parse(String v) => switch (v) {
+        'light' => ThemeMode.light,
+        'dark' => ThemeMode.dark,
+        _ => ThemeMode.system,
+      };
+
+  Future<void> set(ThemeMode m) async {
+    state = m;
+    await ref.read(databaseProvider).setState(key, m.name);
+  }
+}
+
+final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(ThemeModeNotifier.new);

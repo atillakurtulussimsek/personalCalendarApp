@@ -175,9 +175,12 @@ class SyncService {
         for (final n in res.notes) {
           await _applyRecord('note', n);
         }
+        for (final t in res.tasks) {
+          await _applyRecord('task', t);
+        }
         await db.setState(kLastSeq, res.lastSeq.toString());
       });
-      total += res.calendars.length + res.events.length + res.notes.length;
+      total += res.calendars.length + res.events.length + res.notes.length + res.tasks.length;
       since = res.lastSeq;
       if (!res.hasMore) break;
     }
@@ -205,6 +208,8 @@ class SyncService {
         await db.into(db.events).insertOnConflictUpdate(eventFromJson(j));
       case 'note':
         await db.into(db.notes).insertOnConflictUpdate(noteFromJson(j));
+      case 'task':
+        await db.into(db.tasks).insertOnConflictUpdate(taskFromJson(j));
     }
   }
 
@@ -219,6 +224,9 @@ class SyncService {
       case 'note':
         await (db.update(db.notes)..where((t) => t.id.equals(id)))
             .write(NotesCompanion(version: Value(version), serverSeq: Value(serverSeq)));
+      case 'task':
+        await (db.update(db.tasks)..where((t) => t.id.equals(id)))
+            .write(TasksCompanion(version: Value(version), serverSeq: Value(serverSeq)));
     }
   }
 

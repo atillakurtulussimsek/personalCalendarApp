@@ -56,6 +56,22 @@ internal/httpx       JSON + error envelope helpers
 
 To use an external MySQL instead, set `DATABASE_URL` and remove the `db` service.
 
+### Backups
+
+The `backup` service runs `scripts/backup.sh`: a `mysqldump --single-transaction` every
+`BACKUP_INTERVAL` seconds (default daily) into the `backups` volume, keeping
+`BACKUP_KEEP_DAYS` (default 14) days. Copy the volume off-host with Dokploy's volume backup
+or `docker cp`. Restore:
+
+```bash
+gunzip -c personal_calendar-20261013-020000.sql.gz | docker compose exec -T db mysql -uroot -p"$MYSQL_ROOT_PASSWORD" personal_calendar
+```
+
+### ICS export
+
+`GET /export.ics` and `GET /calendars/{id}/export.ics` (bearer auth) return every event
+as iCalendar for import into other clients.
+
 ## Live sync
 
 * `GET /ws` streams `{"type":"sync","seq":N}` to a user's other devices after every write

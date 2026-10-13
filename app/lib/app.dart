@@ -18,7 +18,7 @@ class App extends ConsumerWidget {
       onGenerateTitle: (ctx) => L10n.of(ctx).appTitle,
       theme: lightTheme(),
       darkTheme: darkTheme(),
-      themeMode: ThemeMode.system,
+      themeMode: ref.watch(themeModeProvider),
       locale: const Locale('tr'),
       supportedLocales: L10n.supportedLocales,
       localizationsDelegates: const [

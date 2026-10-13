@@ -77,6 +77,15 @@ func (h *Handlers) Mount(r chi.Router) {
 			r.Get("/{id}", h.getCalendar)
 			r.Put("/{id}", h.updateCalendar)
 			r.Delete("/{id}", h.deleteCalendar)
+			r.Get("/{id}/export.ics", h.exportICS)
+		})
+		r.Get("/export.ics", h.exportICS)
+		r.Route("/tasks", func(r chi.Router) {
+			r.Get("/", h.listTasks)
+			r.Post("/", h.createTask)
+			r.Get("/{id}", h.getTask)
+			r.Put("/{id}", h.updateTask)
+			r.Delete("/{id}", h.deleteTask)
 		})
 		r.Route("/events", func(r chi.Router) {
 			r.Get("/", h.listEvents)

@@ -4,7 +4,7 @@ import 'package:personal_calendar/data/api/sync_api.dart';
 /// In-memory server that mirrors the backend's sync semantics closely enough
 /// for client tests: versions, server_seq, last-writer-wins, note conflict copies.
 class FakeSyncApi implements SyncApi {
-  final Map<String, Map<String, Map<String, dynamic>>> tables = {'calendar': {}, 'event': {}, 'note': {}};
+  final Map<String, Map<String, Map<String, dynamic>>> tables = {'calendar': {}, 'event': {}, 'note': {}, 'task': {}};
   int seq = 0;
   bool offline = false;
   bool unauthorized = false;
@@ -113,6 +113,7 @@ class FakeSyncApi implements SyncApi {
       'calendars': [for (final p in page) if (p.$2 == 'calendar') full('calendar', p.$3)],
       'events': [for (final p in page) if (p.$2 == 'event') full('event', p.$3)],
       'notes': [for (final p in page) if (p.$2 == 'note') full('note', p.$3)],
+      'tasks': [for (final p in page) if (p.$2 == 'task') {'done': false, ...p.$3}],
       'last_seq': lastSeq,
       'has_more': hasMore,
     });

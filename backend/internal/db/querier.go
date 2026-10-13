@@ -25,11 +25,14 @@ type Querier interface {
 	GetNote(ctx context.Context, arg GetNoteParams) (Note, error)
 	GetNoteForUpdate(ctx context.Context, arg GetNoteForUpdateParams) (Note, error)
 	GetSessionByTokenHash(ctx context.Context, refreshTokenHash string) (Session, error)
+	GetTask(ctx context.Context, arg GetTaskParams) (Task, error)
+	GetTaskForUpdate(ctx context.Context, arg GetTaskForUpdateParams) (Task, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id string) (User, error)
 	InsertCalendar(ctx context.Context, arg InsertCalendarParams) error
 	InsertEvent(ctx context.Context, arg InsertEventParams) error
 	InsertNote(ctx context.Context, arg InsertNoteParams) error
+	InsertTask(ctx context.Context, arg InsertTaskParams) error
 	ListCalendars(ctx context.Context, userID string) ([]Calendar, error)
 	ListDevices(ctx context.Context, userID string) ([]Device, error)
 	ListEventExceptions(ctx context.Context, arg ListEventExceptionsParams) ([]Event, error)
@@ -38,10 +41,12 @@ type Querier interface {
 	ListNotes(ctx context.Context, arg ListNotesParams) ([]Note, error)
 	ListNotesByEvent(ctx context.Context, arg ListNotesByEventParams) ([]Note, error)
 	ListNotesByTag(ctx context.Context, arg ListNotesByTagParams) ([]Note, error)
+	ListTasks(ctx context.Context, arg ListTasksParams) ([]Task, error)
 	NextServerSeq(ctx context.Context) (sql.Result, error)
 	PullCalendars(ctx context.Context, arg PullCalendarsParams) ([]Calendar, error)
 	PullEvents(ctx context.Context, arg PullEventsParams) ([]Event, error)
 	PullNotes(ctx context.Context, arg PullNotesParams) ([]Note, error)
+	PullTasks(ctx context.Context, arg PullTasksParams) ([]Task, error)
 	RevokeSession(ctx context.Context, arg RevokeSessionParams) error
 	RevokeSessionsByDevice(ctx context.Context, arg RevokeSessionsByDeviceParams) error
 	SearchNotes(ctx context.Context, arg SearchNotesParams) ([]Note, error)
@@ -51,6 +56,7 @@ type Querier interface {
 	UpdateDevicePushToken(ctx context.Context, arg UpdateDevicePushTokenParams) error
 	UpdateEvent(ctx context.Context, arg UpdateEventParams) error
 	UpdateNote(ctx context.Context, arg UpdateNoteParams) error
+	UpdateTask(ctx context.Context, arg UpdateTaskParams) error
 	UpsertDevice(ctx context.Context, arg UpsertDeviceParams) error
 }
 

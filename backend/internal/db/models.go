@@ -88,6 +88,20 @@ type SyncCounter struct {
 	Value int64 `json:"value"`
 }
 
+type Task struct {
+	ID        string         `json:"id"`
+	UserID    string         `json:"user_id"`
+	Title     string         `json:"title"`
+	DueAt     sql.NullTime   `json:"due_at"`
+	Done      bool           `json:"done"`
+	NoteID    sql.NullString `json:"note_id"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt sql.NullTime   `json:"deleted_at"`
+	Version   int64          `json:"version"`
+	ServerSeq int64          `json:"server_seq"`
+}
+
 type User struct {
 	ID           string    `json:"id"`
 	Email        string    `json:"email"`
