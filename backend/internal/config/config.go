@@ -23,21 +23,34 @@ type Config struct {
 	// (0 = none, client IP from the TCP connection; N = Nth-from-right X-Forwarded-For entry).
 	TrustedProxies int
 	LogLevel       string
+	// FCMServiceAccountJSON holds Firebase service-account credentials (raw JSON).
+	// Empty disables push; FCM_SERVICE_ACCOUNT_FILE may point to the file instead.
+	FCMServiceAccountJSON string
 }
 
 // Load reads configuration from the environment. Required values produce an error.
 func Load() (Config, error) {
 	cfg := Config{
-		Addr:              getenv("ADDR", ":8080"),
-		DatabaseURL:       os.Getenv("DATABASE_URL"),
-		JWTSecret:         os.Getenv("JWT_SECRET"),
-		AccessTokenTTL:    getDuration("ACCESS_TOKEN_TTL", 15*time.Minute),
-		RefreshTokenTTL:   getDuration("REFRESH_TOKEN_TTL", 30*24*time.Hour),
-		AllowRegistration: getBool("ALLOW_REGISTRATION", true),
-		CORSOrigins:       splitList(getenv("CORS_ORIGINS", "*")),
-		RateLimitPerMin:   getInt("RATE_LIMIT_PER_MIN", 300),
-		TrustedProxies:    getInt("TRUSTED_PROXIES", 0),
-		LogLevel:          getenv("LOG_LEVEL", "info"),
+		Addr:                  getenv("ADDR", ":8080"),
+		DatabaseURL:           os.Getenv("DATABASE_URL"),
+		JWTSecret:             os.Getenv("JWT_SECRET"),
+		AccessTokenTTL:        getDuration("ACCESS_TOKEN_TTL", 15*time.Minute),
+		RefreshTokenTTL:       getDuration("REFRESH_TOKEN_TTL", 30*24*time.Hour),
+		AllowRegistration:     getBool("ALLOW_REGISTRATION", true),
+		CORSOrigins:           splitList(getenv("CORS_ORIGINS", "*")),
+		RateLimitPerMin:       getInt("RATE_LIMIT_PER_MIN", 300),
+		TrustedProxies:        getInt("TRUSTED_PROXIES", 0),
+		FCMServiceAccountJSON: os.Getenv("FCM_SERVICE_ACCOUNT_JSON"),
+		LogLevel:              getenv("LOG_LEVEL", "info"),
+	}
+	if cfg.FCMServiceAccountJSON == "" {
+		if path := os.Getenv("FCM_SERVICE_ACCOUNT_FILE"); path != "" {
+			b, err := os.ReadFile(path)
+			if err != nil {
+				return cfg, fmt.Errorf("FCM_SERVICE_ACCOUNT_FILE: %w", err)
+			}
+			cfg.FCMServiceAccountJSON = string(b)
+		}
 	}
 	if cfg.DatabaseURL == "" {
 		return cfg, fmt.Errorf("DATABASE_URL is required")

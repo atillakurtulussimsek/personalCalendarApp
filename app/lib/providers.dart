@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/widgets.dart';
@@ -13,7 +14,11 @@ import 'data/repositories/auth_repository.dart';
 import 'data/repositories/ics_service.dart';
 import 'data/repositories/repositories.dart';
 import 'data/sync/sync_service.dart';
+import 'platform/background_sync.dart';
 import 'platform/desktop_integration.dart';
+import 'platform/live_sync.dart';
+import 'platform/push_service.dart';
+import 'platform/reminders_service.dart';
 import 'platform/widget_publisher.dart';
 
 /// Overridden in tests with in-memory implementations.
@@ -25,15 +30,17 @@ final databaseProvider = Provider<AppDatabase>((ref) {
 
 final tokenStoreProvider = Provider<TokenStore>((ref) => SecureTokenStore());
 
-final apiClientProvider = Provider<ApiClient>((ref) {
+final Provider<ApiClient> apiClientProvider = Provider<ApiClient>((ref) {
   return ApiClient(ref.watch(tokenStoreProvider), onSessionExpired: () {
     ref.read(sessionProvider.notifier).expire();
+  }, onTokenRefreshed: () {
+    ref.read(liveSyncProvider).reconnect();
   });
 });
 
-final syncApiProvider = Provider<SyncApi>((ref) => HttpSyncApi(ref.watch(apiClientProvider)));
+final Provider<SyncApi> syncApiProvider = Provider<SyncApi>((ref) => HttpSyncApi(ref.watch(apiClientProvider)));
 
-final syncServiceProvider = Provider<SyncService>((ref) {
+final Provider<SyncService> syncServiceProvider = Provider<SyncService>((ref) {
   final s = SyncService(ref.watch(databaseProvider), ref.watch(syncApiProvider));
   ref.onDispose(s.dispose);
   return s;
@@ -92,6 +99,9 @@ class SessionNotifier extends Notifier<SessionState> {
   }
 
   Future<void> logout() async {
+    ref.read(syncTriggersProvider).stop();
+    await ref.read(remindersServiceProvider).cancelAll();
+    await BackgroundSync.cancel();
     await ref.read(authRepositoryProvider).logout();
     state = SessionState.loggedOut;
   }
@@ -103,23 +113,36 @@ final sessionProvider = NotifierProvider<SessionNotifier, SessionState>(SessionN
 
 /// Triggers sync on foreground, connectivity regain and a periodic timer.
 class SyncTriggers with WidgetsBindingObserver {
-  SyncTriggers(this.sync, this.ics);
+  SyncTriggers(this.sync, this.ics, this.live, this.reminders, this.push);
   final SyncService sync;
   final IcsService ics;
+  final LiveSync live;
+  final RemindersService reminders;
+  final PushService push;
   StreamSubscription<List<ConnectivityResult>>? _conn;
+  StreamSubscription<void>? _applied;
   Timer? _periodic;
 
   void start() {
     WidgetsBinding.instance.addObserver(this);
     _conn = Connectivity().onConnectivityChanged.listen((results) {
-      if (results.any((r) => r != ConnectivityResult.none)) sync.sync();
+      if (results.any((r) => r != ConnectivityResult.none)) {
+        sync.sync();
+        live.reconnect();
+      }
     });
     _periodic = Timer.periodic(const Duration(minutes: 5), (_) {
       sync.sync();
       ics.refreshStale();
     });
+    // after remote changes land, reminders of changed/deleted events are re-planned
+    _applied = sync.onApplied.listen((_) => reminders.refresh());
     sync.sync();
     ics.refreshStale();
+    reminders.init().then((_) => reminders.start());
+    live.start();
+    push.start();
+    BackgroundSync.register();
   }
 
   @override
@@ -127,21 +150,45 @@ class SyncTriggers with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       sync.sync();
       ics.refreshStale();
+      live.start();
+    } else if (state == AppLifecycleState.paused && Platform.isAndroid) {
+      // Android: no socket in the background (Doze would kill it); FCM/WorkManager take over
+      live.stop();
     }
   }
 
   void stop() {
     WidgetsBinding.instance.removeObserver(this);
     _conn?.cancel();
+    _applied?.cancel();
     _periodic?.cancel();
+    live.stop();
   }
 }
 
 final syncTriggersProvider = Provider<SyncTriggers>((ref) {
-  final t = SyncTriggers(ref.watch(syncServiceProvider), ref.watch(icsServiceProvider));
+  final t = SyncTriggers(ref.watch(syncServiceProvider), ref.watch(icsServiceProvider), ref.watch(liveSyncProvider),
+      ref.watch(remindersServiceProvider), ref.watch(pushServiceProvider));
   ref.onDispose(t.stop);
   return t;
 });
+
+final remindersServiceProvider = Provider<RemindersService>((ref) {
+  final r = RemindersService(ref.watch(eventRepositoryProvider), ref.watch(calendarRepositoryProvider));
+  ref.onDispose(r.dispose);
+  return r;
+});
+
+final Provider<LiveSync> liveSyncProvider = Provider<LiveSync>((ref) {
+  final l = LiveSync(ref.watch(tokenStoreProvider), ref.watch(syncServiceProvider));
+  ref.onDispose(l.dispose);
+  return l;
+});
+
+final liveStateProvider = StreamProvider<LiveState>((ref) => ref.watch(liveSyncProvider).state);
+
+final pushServiceProvider = Provider<PushService>(
+    (ref) => PushService(ref.watch(apiClientProvider), ref.watch(tokenStoreProvider), ref.watch(syncServiceProvider)));
 
 final widgetPublisherProvider = Provider<WidgetPublisher>((ref) {
   final w = WidgetPublisher(ref.watch(eventRepositoryProvider), ref.watch(calendarRepositoryProvider));

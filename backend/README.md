@@ -56,6 +56,14 @@ internal/httpx       JSON + error envelope helpers
 
 To use an external MySQL instead, set `DATABASE_URL` and remove the `db` service.
 
+## Live sync
+
+* `GET /ws` streams `{"type":"sync","seq":N}` to a user's other devices after every write
+  (`internal/notify`). Clients run a sync on each signal.
+* With `FCM_SERVICE_ACCOUNT_JSON` (or `_FILE`) set, Android devices that registered a push token
+  also get a high-priority data message (`{"type":"sync"}`), debounced to one push per 2 s burst.
+  Invalid tokens are cleared automatically.
+
 ## API
 
 See [`../docs/api.yaml`](../docs/api.yaml) (OpenAPI 3) and

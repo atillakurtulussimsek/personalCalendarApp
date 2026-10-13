@@ -146,3 +146,26 @@ AppDelegate) compiles only in theory. First macOS build will likely need small f
 
 Hotkey, Dock hiding, launch-at-login and the Android capture notification are per device,
 so they are stored in the drift key/value table under `setting.*` keys, not synced.
+
+## 2026-10-13 — Firebase without google-services.json
+
+**Decision:** FCM is initialised from `--dart-define` values (`FirebaseOptions`) instead of
+`google-services.json` + the Gradle plugin, and the backend takes the service-account JSON
+from `FCM_SERVICE_ACCOUNT_JSON`. Push is optional: when the values are empty the app builds
+and runs without Firebase, relying on WebSocket (foreground) and WorkManager (background).
+
+**Rationale:** The repository stays free of project-specific secrets and the build never
+breaks for a contributor without a Firebase project.
+
+## 2026-10-13 — Live sync transport per platform
+
+macOS keeps a WebSocket to `/ws` open permanently. Android uses the socket only while the app
+is in the foreground (Doze kills idle sockets anyway); in the background FCM high-priority
+data messages and the 15-minute WorkManager job take over. The server never notifies the
+device that caused the change.
+
+## 2026-10-13 — Reminder scheduling window
+
+Only the next 14 days (max 400 alarms) are scheduled, because Android limits pending alarms
+(~500 per app) and recurring events are unbounded. The window slides every 6 hours and after
+each change; ids are deterministic hashes so an unchanged occurrence is never re-scheduled.

@@ -40,6 +40,7 @@ func (h *Handlers) createNote(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, mapErr(err))
 		return
 	}
+	h.changed(r, out.ServerSeq)
 	httpx.WriteJSON(w, http.StatusCreated, out)
 }
 
@@ -74,6 +75,7 @@ func (h *Handlers) updateNote(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, mapErr(err))
 		return
 	}
+	h.changed(r, out.ServerSeq)
 	httpx.WriteJSON(w, http.StatusOK, out)
 }
 
@@ -87,5 +89,6 @@ func (h *Handlers) deleteNote(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, mapErr(err))
 		return
 	}
+	h.changed(r, 0)
 	httpx.WriteJSON(w, http.StatusNoContent, nil)
 }

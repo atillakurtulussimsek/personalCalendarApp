@@ -17,7 +17,7 @@ docs/      mimari, API (OpenAPI), karar günlüğü
 | 2 | Flutter temeli: drift, auth, outbox + sync, notlar, ay/ajanda | ✅ |
 | 3 | Takvim derinliği: hafta/gün, sürükle-bırak, tekrar kuralları, istisnalar, ICS abonelik | ✅ |
 | 4 | Anlık yakalama: Türkçe ayrıştırıcı, Android widget/tile/paylaş/bildirim/kısayol, macOS menü çubuğu + global kısayol | ✅ |
-| 5 | Bildirimler ve canlı senkron | |
+| 5 | Bildirimler ve canlı senkron: yerel hatırlatıcılar, WebSocket, FCM, WorkManager | ✅ |
 | 6 | Cilalama: görevler, ICS, yedekleme, CalDAV (ops.) | |
 
 ## Hızlı başlangıç (backend)

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/recurrence.dart';
 import '../../l10n/app_localizations.dart';
 import '../../platform/app_intents.dart';
 import '../../platform/desktop_integration.dart';
@@ -49,6 +50,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       });
       AppIntents.instance.flush();
       await _startDesktop();
+      await _maybeAskPermissions();
     });
   }
 
@@ -92,8 +94,44 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       case AppIntentType.today:
         setState(() => _index = 0);
         _calendarKey.currentState?.goToday();
+      case AppIntentType.openEvent:
+        _openEventById(i.text);
       case AppIntentType.show:
         break;
+    }
+  }
+
+  Future<void> _openEventById(String? id) async {
+    if (id == null) return;
+    final e = await ref.read(eventRepositoryProvider).get(id);
+    if (e == null || !mounted) return;
+    // a master or a single event: show the next occurrence from now, else the event itself
+    final occs = expandEvents([e], DateTime.now(), DateTime.now().add(const Duration(days: 400)));
+    final occ = occs.isNotEmpty ? occs.first : Occurrence(event: e, start: e.startAt, end: e.endAt, seriesId: e.recurrenceId ?? e.id, isException: e.recurrenceId != null);
+    if (mounted) await openEventEditor(context, occurrence: occ);
+  }
+
+  /// First launch: explain and request notification / exact-alarm permissions.
+  Future<void> _maybeAskPermissions() async {
+    final db = ref.read(databaseProvider);
+    if (await db.getState(SettingKeys.permissionsAsked) == 'true') return;
+    await db.setState(SettingKeys.permissionsAsked, 'true');
+    if (!mounted || !(Platform.isAndroid || Platform.isMacOS)) return;
+    final l = L10n.of(context);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l.permissionDialogTitle),
+        content: Text(l.permissionDialogBody),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l.permissionDialogLater)),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l.permissionDialogAllow)),
+        ],
+      ),
+    );
+    if (ok == true) {
+      await ref.read(remindersServiceProvider).requestPermissions();
+      await ref.read(remindersServiceProvider).refresh();
     }
   }
 

@@ -13,6 +13,7 @@ import (
 	"github.com/atillasimsek/personal-calendar/backend/internal/auth"
 	"github.com/atillasimsek/personal-calendar/backend/internal/config"
 	"github.com/atillasimsek/personal-calendar/backend/internal/httpx"
+	"github.com/atillasimsek/personal-calendar/backend/internal/notify"
 	"github.com/atillasimsek/personal-calendar/backend/internal/store"
 )
 
@@ -24,6 +25,23 @@ type Handlers struct {
 	Now    func() time.Time
 	// AuthLimiter, when set, wraps the credential endpoints (login/register).
 	AuthLimiter func(http.Handler) http.Handler
+	// Hub fans out change signals to other devices (may be nil).
+	Hub *notify.Hub
+}
+
+// changed tells the hub that the user's data changed (no-op without a hub).
+func (h *Handlers) changed(r *http.Request, seq int64) {
+	if h.Hub == nil {
+		return
+	}
+	if seq == 0 {
+		s, err := h.Store.LastSeq(r.Context())
+		if err != nil {
+			return
+		}
+		seq = s
+	}
+	h.Hub.Changed(httpx.UserID(r.Context()), httpx.DeviceID(r.Context()), seq)
 }
 
 // New builds the handler set.
@@ -78,6 +96,7 @@ func (h *Handlers) Mount(r chi.Router) {
 			r.Get("/", h.pull)
 			r.Post("/", h.push)
 		})
+		r.Get("/ws", h.websocket)
 		r.Route("/devices", func(r chi.Router) {
 			r.Get("/", h.listDevices)
 			r.Post("/", h.registerDevice)
@@ -91,11 +110,15 @@ func (h *Handlers) Mount(r chi.Router) {
 func (h *Handlers) RequireAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		hdr := r.Header.Get("Authorization")
+		token := strings.TrimPrefix(hdr, "Bearer ")
 		if !strings.HasPrefix(hdr, "Bearer ") {
+			token = r.URL.Query().Get("token") // WebSocket clients cannot always set headers
+		}
+		if token == "" {
 			httpx.WriteError(w, httpx.Unauthorized("missing bearer token"))
 			return
 		}
-		claims, err := h.Tokens.ParseAccess(strings.TrimPrefix(hdr, "Bearer "))
+		claims, err := h.Tokens.ParseAccess(token)
 		if err != nil {
 			httpx.WriteError(w, httpx.Unauthorized("invalid or expired token"))
 			return

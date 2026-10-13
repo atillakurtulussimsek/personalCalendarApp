@@ -8,6 +8,7 @@ import 'package:hotkey_manager/hotkey_manager.dart';
 import '../../l10n/app_localizations.dart';
 import '../../platform/app_intents.dart';
 import '../../platform/desktop_integration.dart';
+import '../../platform/live_sync.dart';
 import '../../providers.dart';
 
 /// Keys in the sync_state kv table used for device-local settings.
@@ -16,6 +17,7 @@ class SettingKeys {
   static const hotkey = 'setting.hotkey';
   static const hideDock = 'setting.hide_dock';
   static const launchAtLogin = 'setting.launch_at_login';
+  static const permissionsAsked = 'setting.permissions_asked';
 }
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -75,6 +77,40 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         children: [
           ListTile(leading: const Icon(Icons.person_outline), title: Text(l.settingsAccount), subtitle: Text(_email)),
           ListTile(leading: const Icon(Icons.dns_outlined), title: Text(l.settingsServer), subtitle: Text(_server)),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.notifications_outlined),
+            title: Text(l.settingsNotificationPermission),
+            subtitle: Text(l.settingsNotificationPermissionHint),
+            onTap: () async {
+              await ref.read(remindersServiceProvider).requestPermissions(exact: false);
+              await ref.read(remindersServiceProvider).refresh();
+              if (mounted) setState(() {});
+            },
+          ),
+          if (Platform.isAndroid) ...[
+            ListTile(
+              leading: Icon(ref.read(remindersServiceProvider).exactAllowed ? Icons.alarm_on : Icons.alarm_off),
+              title: Text(l.settingsExactAlarm),
+              subtitle: Text(ref.read(remindersServiceProvider).exactAllowed ? l.settingsExactAlarmHintOn : l.settingsExactAlarmHintOff),
+              onTap: () async {
+                await ref.read(remindersServiceProvider).requestPermissions(exact: true);
+                await ref.read(remindersServiceProvider).refresh();
+                if (mounted) setState(() {});
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.battery_saver_outlined),
+              title: Text(l.settingsBatteryHint),
+              dense: true,
+            ),
+          ],
+          ListTile(
+            leading: Icon(ref.watch(liveStateProvider).value == LiveState.connected ? Icons.bolt : Icons.bolt_outlined),
+            title: Text(l.settingsLiveSync),
+            subtitle: Text(
+                '${l.settingsLiveSyncHint} · ${ref.watch(liveStateProvider).value == LiveState.connected ? l.liveStatusConnected : l.liveStatusDisconnected}'),
+          ),
           const Divider(),
           if (Platform.isAndroid)
             SwitchListTile(

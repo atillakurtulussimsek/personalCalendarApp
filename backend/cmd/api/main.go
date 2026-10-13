@@ -15,6 +15,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/atillasimsek/personal-calendar/backend/internal/config"
+	"github.com/atillasimsek/personal-calendar/backend/internal/notify"
 	"github.com/atillasimsek/personal-calendar/backend/internal/server"
 	"github.com/atillasimsek/personal-calendar/backend/internal/store"
 )
@@ -44,9 +45,18 @@ func run() error {
 	}
 	slog.Info("migrations applied")
 
+	var pusher notify.Pusher
+	if fcm, err := notify.NewFCM(context.Background(), []byte(cfg.FCMServiceAccountJSON), db); err != nil {
+		return err
+	} else if fcm != nil {
+		pusher = fcm
+		slog.Info("fcm push enabled")
+	}
+	hub := notify.NewHub(pusher, 2*time.Second)
+
 	srv := &http.Server{
 		Addr:              cfg.Addr,
-		Handler:           server.NewRouter(cfg, store.New(db)),
+		Handler:           server.NewRouter(cfg, store.New(db), hub),
 		ReadHeaderTimeout: 10 * time.Second,
 		ReadTimeout:       30 * time.Second,
 		WriteTimeout:      60 * time.Second,

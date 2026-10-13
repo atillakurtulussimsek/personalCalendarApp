@@ -15,6 +15,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/atillasimsek/personal-calendar/backend/internal/config"
+	"github.com/atillasimsek/personal-calendar/backend/internal/notify"
 	"github.com/atillasimsek/personal-calendar/backend/internal/server"
 	"github.com/atillasimsek/personal-calendar/backend/internal/store"
 )
@@ -31,6 +32,7 @@ type testEnv struct {
 	srv   *httptest.Server
 	store *store.Store
 	token string
+	hub   *notify.Hub
 	// Clock lets tests move "now" forward.
 	Clock *time.Time
 }
@@ -55,10 +57,11 @@ func newEnv(t *testing.T) *testEnv {
 		JWTSecret: "test-secret-test-secret-test-secret-1234", AccessTokenTTL: time.Hour, RefreshTokenTTL: 24 * time.Hour,
 		AllowRegistration: true, CORSOrigins: []string{"*"}, RateLimitPerMin: 100000,
 	}
-	h := server.NewRouter(cfg, st)
+	hub := notify.NewHub(nil, 10*time.Millisecond)
+	h := server.NewRouter(cfg, st, hub)
 	srv := httptest.NewServer(h)
 	t.Cleanup(srv.Close)
-	return &testEnv{t: t, srv: srv, store: st, Clock: &now}
+	return &testEnv{t: t, srv: srv, store: st, Clock: &now, hub: hub}
 }
 
 type resp struct {

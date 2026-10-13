@@ -49,6 +49,12 @@ func (h *Handlers) push(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.touchDevice(r)
+	for _, res := range out.Results {
+		if res.Status == store.StatusApplied {
+			h.changed(r, out.LastSeq)
+			break
+		}
+	}
 	httpx.WriteJSON(w, http.StatusOK, out)
 }
 

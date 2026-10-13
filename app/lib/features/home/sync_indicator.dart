@@ -12,7 +12,7 @@ class SyncIndicator extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = L10n.of(context);
-    final status = ref.watch(syncStatusProvider).value ?? ref.read(syncServiceProvider).currentStatus;
+    final SyncStatus status = ref.watch(syncStatusProvider).value ?? ref.read(syncServiceProvider).currentStatus;
     final scheme = Theme.of(context).colorScheme;
     final (icon, label, color) = switch (status.phase) {
       SyncPhase.syncing => (Icons.sync, l.syncStatusSyncing, scheme.primary),

@@ -5,11 +5,13 @@ import 'package:intl/intl.dart';
 
 import 'app.dart';
 import 'core/tz.dart';
+import 'platform/push_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Intl.defaultLocale = 'tr_TR';
   await initializeDateFormatting('tr');
   await Tz.init();
+  await PushService.initFirebase();
   runApp(const ProviderScope(child: App()));
 }

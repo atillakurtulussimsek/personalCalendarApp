@@ -438,4 +438,73 @@ class L10nTr extends L10n {
 
   @override
   String get hotkeyClear => 'Kaldır';
+
+  @override
+  String reminderTitle(String title) {
+    return '$title';
+  }
+
+  @override
+  String reminderBodyAt(String time, String relative) {
+    return '$time · $relative';
+  }
+
+  @override
+  String get reminderNow => 'şimdi başlıyor';
+
+  @override
+  String reminderInMinutes(int minutes) {
+    return '$minutes dk sonra';
+  }
+
+  @override
+  String get settingsNotifications => 'Bildirimler';
+
+  @override
+  String get settingsExactAlarm => 'Tam zamanlı hatırlatıcılar';
+
+  @override
+  String get settingsExactAlarmHintOn =>
+      'Açık: hatırlatıcılar tam dakikasında gelir';
+
+  @override
+  String get settingsExactAlarmHintOff =>
+      'Kapalı: Android pil tasarrufu nedeniyle bildirim birkaç dakika gecikebilir. Dokunup “Alarmlar ve hatırlatıcılar” iznini ver.';
+
+  @override
+  String get settingsNotificationPermission => 'Bildirim izni';
+
+  @override
+  String get settingsNotificationPermissionHint =>
+      'Hatırlatıcıların görünmesi için gerekli';
+
+  @override
+  String get settingsBatteryHint =>
+      'Xiaomi/Huawei gibi cihazlarda uygulamanın pil kısıtlamasını kaldırmanız gerekebilir.';
+
+  @override
+  String get settingsLiveSync => 'Canlı senkron';
+
+  @override
+  String get settingsLiveSyncHint =>
+      'Diğer cihazlardaki değişiklikler anında gelir (WebSocket / FCM)';
+
+  @override
+  String get permissionDialogTitle => 'Hatırlatıcı izinleri';
+
+  @override
+  String get permissionDialogBody =>
+      'Hatırlatıcıların zamanında görünmesi için bildirim izni ve Android 12+ üzerinde “Alarmlar ve hatırlatıcılar” izni gerekir. Pil tasarrufu (Doze) modunda tam zamanlı alarm izni olmadan bildirimler gecikebilir.';
+
+  @override
+  String get permissionDialogAllow => 'İzin ver';
+
+  @override
+  String get permissionDialogLater => 'Sonra';
+
+  @override
+  String get liveStatusConnected => 'Canlı';
+
+  @override
+  String get liveStatusDisconnected => 'Canlı bağlantı yok';
 }

@@ -198,5 +198,48 @@
   "shortcutCapture": "Hızlı ekle",
   "shortcutToday": "Bugün",
   "hotkeyPressKeys": "Tuş kombinasyonuna bas…",
-  "hotkeyClear": "Kaldır"
+  "hotkeyClear": "Kaldır",
+  "reminderTitle": "{title}",
+  "@reminderTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reminderBodyAt": "{time} · {relative}",
+  "@reminderBodyAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "relative": {
+        "type": "String"
+      }
+    }
+  },
+  "reminderNow": "şimdi başlıyor",
+  "reminderInMinutes": "{minutes} dk sonra",
+  "@reminderInMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsNotifications": "Bildirimler",
+  "settingsExactAlarm": "Tam zamanlı hatırlatıcılar",
+  "settingsExactAlarmHintOn": "Açık: hatırlatıcılar tam dakikasında gelir",
+  "settingsExactAlarmHintOff": "Kapalı: Android pil tasarrufu nedeniyle bildirim birkaç dakika gecikebilir. Dokunup “Alarmlar ve hatırlatıcılar” iznini ver.",
+  "settingsNotificationPermission": "Bildirim izni",
+  "settingsNotificationPermissionHint": "Hatırlatıcıların görünmesi için gerekli",
+  "settingsBatteryHint": "Xiaomi/Huawei gibi cihazlarda uygulamanın pil kısıtlamasını kaldırmanız gerekebilir.",
+  "settingsLiveSync": "Canlı senkron",
+  "settingsLiveSyncHint": "Diğer cihazlardaki değişiklikler anında gelir (WebSocket / FCM)",
+  "permissionDialogTitle": "Hatırlatıcı izinleri",
+  "permissionDialogBody": "Hatırlatıcıların zamanında görünmesi için bildirim izni ve Android 12+ üzerinde “Alarmlar ve hatırlatıcılar” izni gerekir. Pil tasarrufu (Doze) modunda tam zamanlı alarm izni olmadan bildirimler gecikebilir.",
+  "permissionDialogAllow": "İzin ver",
+  "permissionDialogLater": "Sonra",
+  "liveStatusConnected": "Canlı",
+  "liveStatusDisconnected": "Canlı bağlantı yok"
 }

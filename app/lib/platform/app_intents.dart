@@ -7,7 +7,7 @@ import 'package:quick_actions/quick_actions.dart';
 
 /// Something outside the UI asked the app to do: share sheet, widget,
 /// Quick Settings tile, notification action, app shortcut, tray, hotkey, URL.
-enum AppIntentType { capture, newNote, newEvent, today, show }
+enum AppIntentType { capture, newNote, newEvent, today, show, openEvent }
 
 class AppIntent {
   const AppIntent(this.type, {this.text});

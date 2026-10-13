@@ -88,6 +88,7 @@ func (h *Handlers) createEvent(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, mapErr(err))
 		return
 	}
+	h.changed(r, out.ServerSeq)
 	httpx.WriteJSON(w, http.StatusCreated, out)
 }
 
@@ -122,6 +123,7 @@ func (h *Handlers) updateEvent(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, mapErr(err))
 		return
 	}
+	h.changed(r, out.ServerSeq)
 	httpx.WriteJSON(w, http.StatusOK, out)
 }
 
@@ -135,5 +137,6 @@ func (h *Handlers) deleteEvent(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, mapErr(err))
 		return
 	}
+	h.changed(r, 0)
 	httpx.WriteJSON(w, http.StatusNoContent, nil)
 }

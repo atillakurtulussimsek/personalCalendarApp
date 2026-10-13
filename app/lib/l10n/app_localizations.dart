@@ -908,6 +908,120 @@ abstract class L10n {
   /// In tr, this message translates to:
   /// **'Kaldır'**
   String get hotkeyClear;
+
+  /// No description provided for @reminderTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'{title}'**
+  String reminderTitle(String title);
+
+  /// No description provided for @reminderBodyAt.
+  ///
+  /// In tr, this message translates to:
+  /// **'{time} · {relative}'**
+  String reminderBodyAt(String time, String relative);
+
+  /// No description provided for @reminderNow.
+  ///
+  /// In tr, this message translates to:
+  /// **'şimdi başlıyor'**
+  String get reminderNow;
+
+  /// No description provided for @reminderInMinutes.
+  ///
+  /// In tr, this message translates to:
+  /// **'{minutes} dk sonra'**
+  String reminderInMinutes(int minutes);
+
+  /// No description provided for @settingsNotifications.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bildirimler'**
+  String get settingsNotifications;
+
+  /// No description provided for @settingsExactAlarm.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tam zamanlı hatırlatıcılar'**
+  String get settingsExactAlarm;
+
+  /// No description provided for @settingsExactAlarmHintOn.
+  ///
+  /// In tr, this message translates to:
+  /// **'Açık: hatırlatıcılar tam dakikasında gelir'**
+  String get settingsExactAlarmHintOn;
+
+  /// No description provided for @settingsExactAlarmHintOff.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kapalı: Android pil tasarrufu nedeniyle bildirim birkaç dakika gecikebilir. Dokunup “Alarmlar ve hatırlatıcılar” iznini ver.'**
+  String get settingsExactAlarmHintOff;
+
+  /// No description provided for @settingsNotificationPermission.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bildirim izni'**
+  String get settingsNotificationPermission;
+
+  /// No description provided for @settingsNotificationPermissionHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hatırlatıcıların görünmesi için gerekli'**
+  String get settingsNotificationPermissionHint;
+
+  /// No description provided for @settingsBatteryHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Xiaomi/Huawei gibi cihazlarda uygulamanın pil kısıtlamasını kaldırmanız gerekebilir.'**
+  String get settingsBatteryHint;
+
+  /// No description provided for @settingsLiveSync.
+  ///
+  /// In tr, this message translates to:
+  /// **'Canlı senkron'**
+  String get settingsLiveSync;
+
+  /// No description provided for @settingsLiveSyncHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Diğer cihazlardaki değişiklikler anında gelir (WebSocket / FCM)'**
+  String get settingsLiveSyncHint;
+
+  /// No description provided for @permissionDialogTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hatırlatıcı izinleri'**
+  String get permissionDialogTitle;
+
+  /// No description provided for @permissionDialogBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hatırlatıcıların zamanında görünmesi için bildirim izni ve Android 12+ üzerinde “Alarmlar ve hatırlatıcılar” izni gerekir. Pil tasarrufu (Doze) modunda tam zamanlı alarm izni olmadan bildirimler gecikebilir.'**
+  String get permissionDialogBody;
+
+  /// No description provided for @permissionDialogAllow.
+  ///
+  /// In tr, this message translates to:
+  /// **'İzin ver'**
+  String get permissionDialogAllow;
+
+  /// No description provided for @permissionDialogLater.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sonra'**
+  String get permissionDialogLater;
+
+  /// No description provided for @liveStatusConnected.
+  ///
+  /// In tr, this message translates to:
+  /// **'Canlı'**
+  String get liveStatusConnected;
+
+  /// No description provided for @liveStatusDisconnected.
+  ///
+  /// In tr, this message translates to:
+  /// **'Canlı bağlantı yok'**
+  String get liveStatusDisconnected;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

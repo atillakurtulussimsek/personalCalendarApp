@@ -30,7 +30,7 @@ class NetworkException implements Exception {
 /// Dio wrapper: base URL from [TokenStore], bearer header, single-flight
 /// refresh on 401, uniform error mapping.
 class ApiClient {
-  ApiClient(this.tokens, {Dio? dio, this.onSessionExpired}) : dio = dio ?? Dio() {
+  ApiClient(this.tokens, {Dio? dio, this.onSessionExpired, this.onTokenRefreshed}) : dio = dio ?? Dio() {
     this.dio.options
       ..connectTimeout = const Duration(seconds: 10)
       ..receiveTimeout = const Duration(seconds: 30)
@@ -41,6 +41,7 @@ class ApiClient {
   final TokenStore tokens;
   final Dio dio;
   final void Function()? onSessionExpired;
+  final void Function()? onTokenRefreshed;
 
   Future<void>? _refreshing;
 
@@ -106,6 +107,7 @@ class ApiClient {
           body: {'refresh_token': refresh}, auth: false, retryOnAuthError: false);
       await tokens.write(TokenStore.accessToken, data['access_token'] as String);
       await tokens.write(TokenStore.refreshToken, data['refresh_token'] as String);
+      onTokenRefreshed?.call();
       return true;
     } on ApiException catch (e) {
       if (e.isAuthError) await tokens.clearAuth();

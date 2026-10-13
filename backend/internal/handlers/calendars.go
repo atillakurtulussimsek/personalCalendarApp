@@ -33,6 +33,7 @@ func (h *Handlers) createCalendar(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, mapErr(err))
 		return
 	}
+	h.changed(r, out.ServerSeq)
 	httpx.WriteJSON(w, http.StatusCreated, out)
 }
 
@@ -67,6 +68,7 @@ func (h *Handlers) updateCalendar(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, mapErr(err))
 		return
 	}
+	h.changed(r, out.ServerSeq)
 	httpx.WriteJSON(w, http.StatusOK, out)
 }
 
@@ -80,5 +82,6 @@ func (h *Handlers) deleteCalendar(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteError(w, mapErr(err))
 		return
 	}
+	h.changed(r, 0)
 	httpx.WriteJSON(w, http.StatusNoContent, nil)
 }

@@ -23,6 +23,7 @@ import (
 	"github.com/atillasimsek/personal-calendar/backend/internal/handlers"
 	"github.com/atillasimsek/personal-calendar/backend/internal/httpx"
 	"github.com/atillasimsek/personal-calendar/backend/internal/migrations"
+	"github.com/atillasimsek/personal-calendar/backend/internal/notify"
 	"github.com/atillasimsek/personal-calendar/backend/internal/store"
 )
 
@@ -102,8 +103,8 @@ func Reset(db *sql.DB) error {
 	return Migrate(db)
 }
 
-// NewRouter builds the HTTP handler.
-func NewRouter(cfg config.Config, st *store.Store) http.Handler {
+// NewRouter builds the HTTP handler. hub may be nil (no live sync).
+func NewRouter(cfg config.Config, st *store.Store, hub *notify.Hub) http.Handler {
 	r := chi.NewRouter()
 	if cfg.TrustedProxies > 0 {
 		r.Use(middleware.ClientIPFromXFFTrustedProxies(cfg.TrustedProxies))
@@ -112,7 +113,16 @@ func NewRouter(cfg config.Config, st *store.Store) http.Handler {
 	}
 	r.Use(requestLogger)
 	r.Use(middleware.Recoverer)
-	r.Use(middleware.Timeout(60 * time.Second))
+	r.Use(func(next http.Handler) http.Handler {
+		timeout := middleware.Timeout(60 * time.Second)(next)
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/ws" {
+				next.ServeHTTP(w, r) // long-lived connection
+				return
+			}
+			timeout.ServeHTTP(w, r)
+		})
+	})
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   cfg.CORSOrigins,
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -126,6 +136,7 @@ func NewRouter(cfg config.Config, st *store.Store) http.Handler {
 		httpx.WriteError(w, &httpx.APIError{Status: http.StatusMethodNotAllowed, Code: "method_not_allowed", Message: "method not allowed"})
 	})
 	h := handlers.New(cfg, st)
+	h.Hub = hub
 	h.AuthLimiter = httprate.LimitBy(20, time.Minute, keyByClientIP) // stricter limit on credential endpoints
 	h.Mount(r)
 	return r

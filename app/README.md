@@ -90,6 +90,32 @@ lib/features/notes             list + FTS search, Markdown editor with autosave
   Settings), close-to-menu-bar, "hide from Dock", launch at login (SMAppService), URL scheme.
   Not yet compiled on this machine (Xcode missing) — see `docs/decisions.md`.
 
+## Reminders & live sync (phase 5)
+
+* `platform/reminders_service.dart` expands the next 14 days, gives every
+  (occurrence, reminder) a stable id and re-plans after each local change or sync:
+  stale alarms are cancelled, new ones scheduled with `flutter_local_notifications`.
+  Works fully offline; tapping a notification opens the event.
+* **Android permissions**: on first launch the app explains and requests notification
+  permission and (Android 12+) the "Alarms & reminders" exact-alarm permission. Without it
+  reminders use `inexactAllowWhileIdle` and may be delayed by Doze; Settings shows the
+  state and re-requests. Some OEMs (Xiaomi, Huawei) also need battery optimisation disabled.
+* `platform/live_sync.dart` keeps `GET /ws` open (always on macOS, foreground only on
+  Android) and runs a sync on each `{"type":"sync"}` signal; exponential backoff,
+  re-auth after token refresh.
+* `platform/push_service.dart` (Android): FCM data messages wake the app for a sync even
+  when it is closed. Configure with `--dart-define` (no google-services.json needed):
+
+  ```bash
+  flutter build apk --release \
+    --dart-define=FIREBASE_API_KEY=… --dart-define=FIREBASE_APP_ID=… \
+    --dart-define=FIREBASE_SENDER_ID=… --dart-define=FIREBASE_PROJECT_ID=…
+  ```
+
+  and set `FCM_SERVICE_ACCOUNT_JSON` on the backend. Without these, push is simply off.
+* `platform/background_sync.dart`: WorkManager periodic sync every 15 min (Android),
+  network-constrained, shares the SQLite database across isolates.
+
 ## Sync behaviour
 
 * Every write goes to SQLite first and appends to the outbox (one row per record; later
