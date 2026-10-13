@@ -734,6 +734,180 @@ abstract class L10n {
   /// In tr, this message translates to:
   /// **'Şimdi'**
   String get nowLine;
+
+  /// No description provided for @quickCapture.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hızlı ekle'**
+  String get quickCapture;
+
+  /// No description provided for @captureHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'yarın 15:00 veli toplantısı @okul'**
+  String get captureHint;
+
+  /// No description provided for @captureSaveEvent.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etkinlik olarak kaydet'**
+  String get captureSaveEvent;
+
+  /// No description provided for @captureSaveNote.
+  ///
+  /// In tr, this message translates to:
+  /// **'Not olarak kaydet'**
+  String get captureSaveNote;
+
+  /// No description provided for @captureEvent.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etkinlik'**
+  String get captureEvent;
+
+  /// No description provided for @captureNote.
+  ///
+  /// In tr, this message translates to:
+  /// **'Not'**
+  String get captureNote;
+
+  /// No description provided for @captureEdit.
+  ///
+  /// In tr, this message translates to:
+  /// **'Düzenle'**
+  String get captureEdit;
+
+  /// No description provided for @captureSaved.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaydedildi'**
+  String get captureSaved;
+
+  /// No description provided for @captureExamples.
+  ///
+  /// In tr, this message translates to:
+  /// **'Örnekler: “cuma 10-12 seminer @salon”, “her pazartesi 9:00 toplantı”, “3 kasım 14.30 dişçi 30 dk önce hatırlat”'**
+  String get captureExamples;
+
+  /// No description provided for @settings.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ayarlar'**
+  String get settings;
+
+  /// No description provided for @settingsCaptureNotification.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bildirim çubuğunda “Hızlı not” eylemi'**
+  String get settingsCaptureNotification;
+
+  /// No description provided for @settingsCaptureNotificationHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kalıcı bildirim; dokununca hızlı ekleme açılır'**
+  String get settingsCaptureNotificationHint;
+
+  /// No description provided for @settingsHotkey.
+  ///
+  /// In tr, this message translates to:
+  /// **'Global kısayol'**
+  String get settingsHotkey;
+
+  /// No description provided for @settingsHotkeyHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hızlı ekleme penceresini her yerden açar'**
+  String get settingsHotkeyHint;
+
+  /// No description provided for @settingsHideDock.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dock\'ta gizle (yalnızca menü çubuğu)'**
+  String get settingsHideDock;
+
+  /// No description provided for @settingsLaunchAtLogin.
+  ///
+  /// In tr, this message translates to:
+  /// **'Girişte otomatik başlat'**
+  String get settingsLaunchAtLogin;
+
+  /// No description provided for @settingsAccount.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap'**
+  String get settingsAccount;
+
+  /// No description provided for @settingsServer.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sunucu'**
+  String get settingsServer;
+
+  /// No description provided for @trayShow.
+  ///
+  /// In tr, this message translates to:
+  /// **'Pencereyi göster'**
+  String get trayShow;
+
+  /// No description provided for @trayQuit.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çıkış'**
+  String get trayQuit;
+
+  /// No description provided for @trayNoEvents.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yaklaşan etkinlik yok'**
+  String get trayNoEvents;
+
+  /// No description provided for @trayUpcoming.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yaklaşan'**
+  String get trayUpcoming;
+
+  /// No description provided for @widgetToday.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün'**
+  String get widgetToday;
+
+  /// No description provided for @shortcutNewNote.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni not'**
+  String get shortcutNewNote;
+
+  /// No description provided for @shortcutNewEvent.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni etkinlik'**
+  String get shortcutNewEvent;
+
+  /// No description provided for @shortcutCapture.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hızlı ekle'**
+  String get shortcutCapture;
+
+  /// No description provided for @shortcutToday.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün'**
+  String get shortcutToday;
+
+  /// No description provided for @hotkeyPressKeys.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tuş kombinasyonuna bas…'**
+  String get hotkeyPressKeys;
+
+  /// No description provided for @hotkeyClear.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaldır'**
+  String get hotkeyClear;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

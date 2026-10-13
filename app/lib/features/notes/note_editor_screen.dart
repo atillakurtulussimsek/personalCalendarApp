@@ -14,9 +14,11 @@ import '../../providers.dart';
 
 /// Markdown note editor with autosave (debounced) and a preview toggle.
 class NoteEditorScreen extends ConsumerStatefulWidget {
-  const NoteEditorScreen({super.key, this.noteId, this.eventId});
+  const NoteEditorScreen({super.key, this.noteId, this.eventId, this.initialTitle, this.initialBody});
   final String? noteId;
   final String? eventId;
+  final String? initialTitle;
+  final String? initialBody;
 
   @override
   ConsumerState<NoteEditorScreen> createState() => _NoteEditorScreenState();
@@ -41,6 +43,11 @@ class _NoteEditorScreenState extends ConsumerState<NoteEditorScreen> {
   }
 
   Future<void> _load() async {
+    if (widget.noteId == null) {
+      if (widget.initialTitle != null) _title.text = widget.initialTitle!;
+      if (widget.initialBody != null) _body.text = widget.initialBody!;
+      if (_title.text.isNotEmpty || _body.text.isNotEmpty) _dirty = true;
+    }
     if (widget.noteId != null) {
       final n = await ref.read(noteRepositoryProvider).get(widget.noteId!);
       if (n != null) {

@@ -13,6 +13,8 @@ import 'data/repositories/auth_repository.dart';
 import 'data/repositories/ics_service.dart';
 import 'data/repositories/repositories.dart';
 import 'data/sync/sync_service.dart';
+import 'platform/desktop_integration.dart';
+import 'platform/widget_publisher.dart';
 
 /// Overridden in tests with in-memory implementations.
 final databaseProvider = Provider<AppDatabase>((ref) {
@@ -139,6 +141,22 @@ final syncTriggersProvider = Provider<SyncTriggers>((ref) {
   final t = SyncTriggers(ref.watch(syncServiceProvider), ref.watch(icsServiceProvider));
   ref.onDispose(t.stop);
   return t;
+});
+
+final widgetPublisherProvider = Provider<WidgetPublisher>((ref) {
+  final w = WidgetPublisher(ref.watch(eventRepositoryProvider), ref.watch(calendarRepositoryProvider));
+  ref.onDispose(w.stop);
+  return w;
+});
+
+/// Labels are injected by the shell once localizations are available.
+final desktopLabelsProvider = Provider<DesktopLabels>((ref) =>
+    const DesktopLabels(appTitle: 'Takvim', quickCapture: 'Hızlı ekle', noEvents: 'Yaklaşan etkinlik yok', showWindow: 'Pencereyi göster', quit: 'Çıkış'));
+
+final desktopIntegrationProvider = Provider<DesktopIntegration>((ref) {
+  final d = DesktopIntegration(ref.watch(eventRepositoryProvider), ref.watch(calendarRepositoryProvider), ref.watch(desktopLabelsProvider));
+  ref.onDispose(d.dispose);
+  return d;
 });
 
 final calendarsProvider = StreamProvider<List<Calendar>>((ref) => ref.watch(calendarRepositoryProvider).watchAll());

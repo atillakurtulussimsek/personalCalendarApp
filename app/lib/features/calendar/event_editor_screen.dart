@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/capture_parser.dart';
 import '../../core/dates.dart';
 import '../../core/recurrence.dart';
 import '../../core/theme.dart';
@@ -19,18 +20,22 @@ import 'edit_scope_dialog.dart';
 import 'recurrence_picker.dart';
 
 /// Opens the editor for a new event on [initialStart] or for an existing [occurrence].
-Future<void> openEventEditor(BuildContext context, {Occurrence? occurrence, DateTime? initialStart, bool allDay = false}) {
+Future<void> openEventEditor(BuildContext context,
+    {Occurrence? occurrence, DateTime? initialStart, bool allDay = false, CaptureResult? prefill}) {
   return Navigator.of(context).push(MaterialPageRoute<void>(
-    builder: (_) => EventEditorScreen(occurrence: occurrence, initialStart: initialStart, initialAllDay: allDay),
+    builder: (_) => EventEditorScreen(occurrence: occurrence, initialStart: initialStart, initialAllDay: allDay, prefill: prefill),
     fullscreenDialog: true,
   ));
 }
 
 class EventEditorScreen extends ConsumerStatefulWidget {
-  const EventEditorScreen({super.key, this.occurrence, this.initialStart, this.initialAllDay = false});
+  const EventEditorScreen({super.key, this.occurrence, this.initialStart, this.initialAllDay = false, this.prefill});
   final Occurrence? occurrence;
   final DateTime? initialStart;
   final bool initialAllDay;
+
+  /// Parsed quick-capture result to prefill a new event with.
+  final CaptureResult? prefill;
 
   @override
   ConsumerState<EventEditorScreen> createState() => _EventEditorScreenState();
@@ -87,6 +92,16 @@ class _EventEditorScreenState extends ConsumerState<EventEditorScreen> {
       _rrule = null;
       _reminders = [10];
       _timezone = Tz.local;
+      final pf = widget.prefill;
+      if (pf != null && pf.isEvent) {
+        _title.text = pf.title;
+        _location.text = pf.location;
+        _start = pf.start!;
+        _end = pf.allDay ? pf.end!.subtract(const Duration(days: 1)) : pf.end!;
+        _allDay = pf.allDay;
+        _rrule = pf.rrule;
+        if (pf.reminders.isNotEmpty) _reminders = List.of(pf.reminders);
+      }
     }
   }
 

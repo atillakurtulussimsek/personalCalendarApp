@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -5,6 +6,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../../platform/app_intents.dart';
+import '../../platform/desktop_integration.dart';
+import '../calendar/event_editor_screen.dart';
+import '../capture/capture_sheet.dart';
+import '../settings/settings_screen.dart';
 import '../../providers.dart';
 import '../calendar/calendar_screen.dart';
 import '../calendar/calendars_screen.dart';
@@ -25,10 +31,70 @@ class _HomeShellState extends ConsumerState<HomeShell> {
   final _calendarKey = GlobalKey<CalendarScreenState>();
   final _notesKey = GlobalKey<NotesScreenState>();
 
+  StreamSubscription<AppIntent>? _intents;
+
   @override
   void initState() {
     super.initState();
     ref.read(syncTriggersProvider).start();
+    ref.read(widgetPublisherProvider).start();
+    _intents = AppIntents.instance.stream.listen(_onIntent);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final l = L10n.of(context);
+      await AppIntents.instance.start(shortcutTitles: {
+        AppIntentType.capture: l.shortcutCapture,
+        AppIntentType.newNote: l.shortcutNewNote,
+        AppIntentType.newEvent: l.shortcutNewEvent,
+        AppIntentType.today: l.shortcutToday,
+      });
+      AppIntents.instance.flush();
+      await _startDesktop();
+    });
+  }
+
+  Future<void> _startDesktop() async {
+    if (!DesktopIntegration.supported) return;
+    final d = ref.read(desktopIntegrationProvider);
+    await d.start();
+    final db = ref.read(databaseProvider);
+    final hk = await db.getState(SettingKeys.hotkey);
+    await d.setHotKey(hk == null ? DesktopIntegration.defaultHotKey() : DesktopIntegration.decodeHotKey(hk));
+    if ((await db.getState(SettingKeys.hideDock)) == 'true') await d.setHideDock(true);
+  }
+
+  @override
+  void dispose() {
+    _intents?.cancel();
+    super.dispose();
+  }
+
+  bool _capturing = false;
+
+  Future<void> _capture([String? text]) async {
+    if (_capturing) return;
+    _capturing = true;
+    try {
+      await showCaptureSheet(context, initialText: text);
+    } finally {
+      _capturing = false;
+    }
+  }
+
+  void _onIntent(AppIntent i) {
+    if (!mounted) return;
+    switch (i.type) {
+      case AppIntentType.capture:
+        _capture(i.text);
+      case AppIntentType.newNote:
+        Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => NoteEditorScreen(initialBody: i.text)));
+      case AppIntentType.newEvent:
+        openEventEditor(context);
+      case AppIntentType.today:
+        setState(() => _index = 0);
+        _calendarKey.currentState?.goToday();
+      case AppIntentType.show:
+        break;
+    }
   }
 
   void _newItem() {
@@ -56,24 +122,30 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       appBar: AppBar(
         title: Text(_index == 0 ? l.tabCalendar : l.tabNotes),
         actions: [
+          IconButton(tooltip: '${l.quickCapture} (⌘K)', icon: const Icon(Icons.bolt), onPressed: () => _capture()),
           const SyncIndicator(),
           PopupMenuButton<String>(
             onSelected: (v) {
               if (v == 'logout') ref.read(sessionProvider.notifier).logout();
               if (v == 'calendars') Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const CalendarsScreen()));
+              if (v == 'settings') Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const SettingsScreen()));
             },
             itemBuilder: (_) => [
               PopupMenuItem(value: 'calendars', child: Text(l.calendars)),
+              PopupMenuItem(value: 'settings', child: Text(l.settings)),
               PopupMenuItem(value: 'logout', child: Text(l.logout)),
             ],
           ),
         ],
       ),
       body: IndexedStack(index: _index, children: pages),
-      floatingActionButton: FloatingActionButton(
-        tooltip: _index == 0 ? l.newEvent : l.newNote,
-        onPressed: _newItem,
-        child: const Icon(Icons.add),
+      floatingActionButton: GestureDetector(
+        onLongPress: () => _capture(),
+        child: FloatingActionButton(
+          tooltip: _index == 0 ? l.newEvent : l.newNote,
+          onPressed: _newItem,
+          child: const Icon(Icons.add),
+        ),
       ),
       bottomNavigationBar: wide
           ? null
@@ -114,6 +186,8 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         const SingleActivator(LogicalKeyboardKey.digit1, meta: true): () => setState(() => _index = 0),
         const SingleActivator(LogicalKeyboardKey.digit2, meta: true): () => setState(() => _index = 1),
         const SingleActivator(LogicalKeyboardKey.keyR, meta: true): () => ref.read(syncServiceProvider).sync(),
+        const SingleActivator(LogicalKeyboardKey.keyK, meta: true): () => _capture(),
+        const SingleActivator(LogicalKeyboardKey.keyK, control: true): () => _capture(),
       },
       child: Focus(autofocus: true, child: shell),
     );

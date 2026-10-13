@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Takvim</string>
+    <string name="capture_channel">Hızlı not</string>
+    <string name="capture_title">Hızlı not</string>
+    <string name="capture_hint">Dokun ve yaz: “yarın 15:00 veli toplantısı”</string>
+    <string name="capture_action_note">Not</string>
+    <string name="capture_action_event">Etkinlik</string>
+    <string name="tile_label">Hızlı ekle</string>
+    <string name="widget_today">Bugün</string>
+    <string name="widget_no_events">Etkinlik yok</string>
+    <string name="widget_description">Bugünün ajandası ve hızlı ekleme</string>
+</resources>

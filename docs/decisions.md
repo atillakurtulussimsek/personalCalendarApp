@@ -118,3 +118,31 @@ with the remaining `COUNT` when the rule had one. The server only sees ordinary 
 **Decision:** `flutter_timezone` provides the device IANA name, `timezone` provides the tz
 database; recurrence is iterated in "wall time" (`Tz.toWall`/`fromWall`) so local hours
 survive DST, matching `teambition/rrule-go` with `StrToROptionInLocation` on the server.
+
+## 2026-10-13 — Phase 4 platform packages
+
+| package | reason |
+|---------|--------|
+| `home_widget` | bridges SharedPreferences data to a native `AppWidgetProvider` and reports widget taps |
+| `quick_actions` | long-press launcher shortcuts (official flutter/packages) |
+| `tray_manager` (legacy API), `hotkey_manager`, `window_manager` | leanflutter trio for menu bar icon, global hotkey, hide-to-tray and Dock hiding |
+
+`launch_at_startup` was rejected (its `win32` pin conflicts with `flutter_secure_storage` 11);
+launch-at-login is a 20-line `SMAppService` call in `AppDelegate.swift` instead.
+
+## 2026-10-13 — Quick capture window on macOS
+
+**Decision:** The global hotkey brings the main window forward and opens the capture sheet
+instead of a separate Spotlight-style panel. Flutter desktop has no stable multi-window API;
+a second engine for one text field is not worth the complexity. Revisit when
+`flutter/flutter#30701` lands.
+
+## 2026-10-13 — macOS code is unverified
+
+Xcode is not installed on the development machine, so phase 4 macOS code (tray, hotkey,
+AppDelegate) compiles only in theory. First macOS build will likely need small fixes.
+
+## 2026-10-13 — Device-local settings live in `sync_state`
+
+Hotkey, Dock hiding, launch-at-login and the Android capture notification are per device,
+so they are stored in the drift key/value table under `setting.*` keys, not synced.

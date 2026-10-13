@@ -35,6 +35,8 @@ class CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   void _goToday() => setState(() => _selected = Dates.startOfDay(DateTime.now()));
 
+  void goToday() => _goToday();
+
   (DateTime, DateTime) get _range => switch (_mode) {
         CalendarMode.month => (Dates.gridStart(_month), Dates.gridStart(_month).add(const Duration(days: 42))),
         CalendarMode.week => (_weekStart, _weekStart.add(const Duration(days: 7))),

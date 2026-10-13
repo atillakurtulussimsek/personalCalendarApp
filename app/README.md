@@ -72,6 +72,24 @@ lib/features/notes             list + FTS search, Markdown editor with autosave
   refreshed every 12 hours; they are never pushed to the server.
 * Shortcuts: ←/→ day, ↑/↓ week, PgUp/PgDn period, T today, M/W/D/A views, ⌘N new, ⌘S save.
 
+## Quick capture (phase 4)
+
+* `core/capture_parser.dart` turns one Turkish line into an event or a note
+  (dates, weekdays, times and ranges, day parts, durations, reminders, recurrence,
+  `@location`); `test/capture_parser_test.dart` holds the spec examples.
+* `features/capture/capture_sheet.dart` shows live preview chips; tapping a chip opens the
+  full editor prefilled. Entry points: ⚡ toolbar button, ⌘K / Ctrl+K, long-press on the FAB,
+  and every native entry below (routed through `platform/app_intents.dart`).
+* **Android** (`android/app/src/main/kotlin/...`): share sheet (text/*), home-screen widget
+  with today's agenda + add button (`AgendaWidgetProvider`, data via `home_widget`),
+  Quick Settings tile (`CaptureTileService`), optional persistent notification with
+  note/event actions (`CaptureNotification`, toggled in Settings), long-press app shortcuts
+  (`quick_actions`), deep links `personalcalendar://capture?text=…|note|event|today`.
+* **macOS** (`platform/desktop_integration.dart`, `macos/Runner/AppDelegate.swift`): menu bar
+  icon listing the next events with "Hızlı ekle…", global hotkey (default ⌥Space, changeable in
+  Settings), close-to-menu-bar, "hide from Dock", launch at login (SMAppService), URL scheme.
+  Not yet compiled on this machine (Xcode missing) — see `docs/decisions.md`.
+
 ## Sync behaviour
 
 * Every write goes to SQLite first and appends to the outbox (one row per record; later

@@ -50,7 +50,11 @@ dependencies:
   rrule: ^0.2.18
   timezone: ^0.11.2
   flutter_timezone: ^5.1.1
-
+  home_widget: ^0.10.0
+  quick_actions: ^1.1.1
+  tray_manager: ^0.8.0
+  hotkey_manager: ^0.2.3
+  window_manager: ^0.5.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -72,6 +76,8 @@ dev_dependencies:
 flutter:
   generate: true
   uses-material-design: true
+  assets:
+    - assets/tray_icon.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

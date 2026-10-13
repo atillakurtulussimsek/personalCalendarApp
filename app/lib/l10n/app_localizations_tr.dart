@@ -348,4 +348,94 @@ class L10nTr extends L10n {
 
   @override
   String get nowLine => 'Şimdi';
+
+  @override
+  String get quickCapture => 'Hızlı ekle';
+
+  @override
+  String get captureHint => 'yarın 15:00 veli toplantısı @okul';
+
+  @override
+  String get captureSaveEvent => 'Etkinlik olarak kaydet';
+
+  @override
+  String get captureSaveNote => 'Not olarak kaydet';
+
+  @override
+  String get captureEvent => 'Etkinlik';
+
+  @override
+  String get captureNote => 'Not';
+
+  @override
+  String get captureEdit => 'Düzenle';
+
+  @override
+  String get captureSaved => 'Kaydedildi';
+
+  @override
+  String get captureExamples =>
+      'Örnekler: “cuma 10-12 seminer @salon”, “her pazartesi 9:00 toplantı”, “3 kasım 14.30 dişçi 30 dk önce hatırlat”';
+
+  @override
+  String get settings => 'Ayarlar';
+
+  @override
+  String get settingsCaptureNotification =>
+      'Bildirim çubuğunda “Hızlı not” eylemi';
+
+  @override
+  String get settingsCaptureNotificationHint =>
+      'Kalıcı bildirim; dokununca hızlı ekleme açılır';
+
+  @override
+  String get settingsHotkey => 'Global kısayol';
+
+  @override
+  String get settingsHotkeyHint => 'Hızlı ekleme penceresini her yerden açar';
+
+  @override
+  String get settingsHideDock => 'Dock\'ta gizle (yalnızca menü çubuğu)';
+
+  @override
+  String get settingsLaunchAtLogin => 'Girişte otomatik başlat';
+
+  @override
+  String get settingsAccount => 'Hesap';
+
+  @override
+  String get settingsServer => 'Sunucu';
+
+  @override
+  String get trayShow => 'Pencereyi göster';
+
+  @override
+  String get trayQuit => 'Çıkış';
+
+  @override
+  String get trayNoEvents => 'Yaklaşan etkinlik yok';
+
+  @override
+  String get trayUpcoming => 'Yaklaşan';
+
+  @override
+  String get widgetToday => 'Bugün';
+
+  @override
+  String get shortcutNewNote => 'Yeni not';
+
+  @override
+  String get shortcutNewEvent => 'Yeni etkinlik';
+
+  @override
+  String get shortcutCapture => 'Hızlı ekle';
+
+  @override
+  String get shortcutToday => 'Bugün';
+
+  @override
+  String get hotkeyPressKeys => 'Tuş kombinasyonuna bas…';
+
+  @override
+  String get hotkeyClear => 'Kaldır';
 }
