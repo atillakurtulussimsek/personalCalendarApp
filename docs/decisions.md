@@ -71,3 +71,29 @@ makes the OpenAPI spec and integration tests complete.
 **Decision:** A user always has exactly one default calendar. `is_default=true` on a
 create/update moves the flag; `is_default=false` on the current default is ignored.
 Deleting the default promotes the first remaining calendar. The last calendar cannot be deleted.
+
+## 2026-10-13 — Flutter dependencies beyond the mandated stack
+
+| package | reason |
+|---------|--------|
+| `drift_flutter` | official helper to open drift databases on Android/macOS (replaces the EOL `sqlite3_flutter_libs`) |
+| `flutter_secure_storage` | tokens in Keychain / Android Keystore instead of plain prefs |
+| `connectivity_plus` | "network came back" sync trigger |
+| `uuid` | client-side UUID v4 generation (required by the data model) |
+| `intl` + `flutter_localizations` | Turkish date formats and the i18n pipeline (`gen-l10n`) |
+| `flutter_markdown_plus` | Markdown preview in the note editor (maintained fork of the discontinued `flutter_markdown`) |
+| `mocktail` (dev) | reserved for widget tests; sync tests use hand-written fakes |
+
+No router package: navigation is a `switch` on session state plus `Navigator.push`.
+
+## 2026-10-13 — Client timezone in phase 2
+
+Dart exposes only the zone abbreviation (`+03`), not an IANA name. Until phase 3 adds a
+timezone package the client sends `Europe/Istanbul` for new events; the server stores UTC
+regardless, so this only affects recurrence expansion of events created in phase 2.
+
+## 2026-10-13 — Background sync on Android deferred to phase 5
+
+Foreground triggers (resume, connectivity, periodic timer, post-write debounce) cover
+phase 2. WorkManager periodic sync is added together with FCM in phase 5, because both
+need the same background isolate / shared-database setup (`shareAcrossIsolates`).
