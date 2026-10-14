@@ -207,3 +207,12 @@ downloading the release build, so worker and wasm versions always match.
 ## 2026-10-14 — connectivity_plus pinned to 6.x
 
 7.x uses `NWPath.isUltraConstrained`, absent from the Xcode 16.4 macOS SDK.
+
+## 2026-10-14 — Token storage per platform
+
+* macOS: classic login keychain (`usesDataProtectionKeychain: false`). The data-protection
+  keychain requires a `keychain-access-groups` entitlement and a signing team; unsigned and
+  ad-hoc signed builds fail with -34018.
+* Web: `localStorage`. flutter_secure_storage needs a secure context and stores its own key
+  in localStorage, so it adds no protection; production must be served over HTTPS anyway.
+* Android: Keystore-backed flutter_secure_storage (unchanged).

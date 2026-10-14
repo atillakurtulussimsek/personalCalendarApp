@@ -22,7 +22,10 @@ class SecureTokenStore extends TokenStore {
   SecureTokenStore([FlutterSecureStorage? storage])
       : _storage = storage ??
             const FlutterSecureStorage(
-              mOptions: MacOsOptions(accessibility: KeychainAccessibility.first_unlock),
+              // The data-protection keychain needs a keychain-access-groups entitlement
+              // and a signing team; the classic login keychain works for unsigned and
+              // ad-hoc signed builds too (error -34018 otherwise).
+              mOptions: MacOsOptions(accessibility: KeychainAccessibility.first_unlock, usesDataProtectionKeychain: false),
             );
 
   final FlutterSecureStorage _storage;

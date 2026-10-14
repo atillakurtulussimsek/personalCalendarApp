@@ -36,6 +36,15 @@ database and an in-memory fake of the server's sync semantics (versions, LWW, co
 copies, pagination). `test/api_client_test.dart` covers token refresh. The login widget
 test covers form validation.
 
+## Integration test
+
+```bash
+flutter test integration_test -d macos
+```
+
+Runs on the real platform: OS keychain round-trip and the on-disk SQLite database
+(offline create → FTS search → sync against the in-memory fake server).
+
 ## Build
 
 ```bash

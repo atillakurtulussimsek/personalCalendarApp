@@ -9,6 +9,7 @@ import 'data/api/api_client.dart';
 import 'data/api/auth_api.dart';
 import 'data/api/sync_api.dart';
 import 'data/api/token_store.dart';
+import 'data/api/token_store_platform_native.dart' if (dart.library.js_interop) 'data/api/token_store_platform_web.dart';
 import 'data/db/database.dart';
 import 'data/repositories/auth_repository.dart';
 import 'data/repositories/ics_service.dart';
@@ -29,7 +30,7 @@ final databaseProvider = Provider<AppDatabase>((ref) {
   return db;
 });
 
-final tokenStoreProvider = Provider<TokenStore>((ref) => SecureTokenStore());
+final tokenStoreProvider = Provider<TokenStore>((ref) => createPlatformTokenStore());
 
 final Provider<ApiClient> apiClientProvider = Provider<ApiClient>((ref) {
   return ApiClient(ref.watch(tokenStoreProvider), onSessionExpired: () {
