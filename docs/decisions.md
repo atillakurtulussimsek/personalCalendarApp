@@ -216,3 +216,22 @@ downloading the release build, so worker and wasm versions always match.
 * Web: `localStorage`. flutter_secure_storage needs a secure context and stores its own key
   in localStorage, so it adds no protection; production must be served over HTTPS anyway.
 * Android: Keystore-backed flutter_secure_storage (unchanged).
+
+## 2026-10-14 — Design system and navigation (docs/design/mockups.html)
+
+* One family (Inter, bundled: Regular + SemiBold, OFL licence in `app/assets/fonts`), four sizes
+  (28/17/15/13), two weights, 8-pt spacing, 60/30/10 colours with indigo `#4F5BD5` as the only
+  accent; tokens live in `lib/core/theme.dart` (`AppTokens`, `Space`, `Radii`), shared widgets in
+  `lib/core/ui.dart`.
+* New landing tab **Bugün** (next event with countdown, timeline with a now-line, today's tasks;
+  after 18:00 it summarises the day and looks at tomorrow).
+* The FAB is replaced by an always-visible capture bar in the thumb zone; its default target
+  follows the tab (note on Notes, task on Tasks, the selected day on Calendar).
+* Phone week view shows a rolling 5-day window starting at the selected day; wide screens keep
+  the Monday-based 7-day week.
+
+## 2026-10-14 — Web assets are revalidated, never cached blindly
+
+Flutter web file names are not content-hashed, so the API serves every embedded file with
+`Cache-Control: no-cache` and a strong ETag (sha256). A one-day max-age had mixed a stale
+tree-shaken icon font with a new build (icons and Inter missing after a deploy).

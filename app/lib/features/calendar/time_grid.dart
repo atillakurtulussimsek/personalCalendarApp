@@ -72,7 +72,7 @@ class _TimeGridState extends State<TimeGrid> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final t = context.tokens;
     final allDayItems = widget.occurrences.where((o) => o.allDay || o.end.difference(o.start) >= const Duration(days: 1)).toList();
     final timed = widget.occurrences.where((o) => !allDayItems.contains(o)).toList();
     final now = DateTime.now();
@@ -90,17 +90,16 @@ class _TimeGridState extends State<TimeGrid> {
                   child: InkWell(
                     onTap: () => widget.onCreate(_dayAt(i), true),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      padding: const EdgeInsets.only(bottom: Space.sm),
                       child: Column(
                         children: [
                           Text(['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'][Dates.weekdayIndex(_dayAt(i))],
-                              style: Theme.of(context).textTheme.labelSmall),
-                          CircleAvatar(
-                            radius: 14,
-                            backgroundColor: Dates.sameDay(_dayAt(i), now) ? scheme.primary : Colors.transparent,
-                            child: Text('${_dayAt(i).day}',
-                                style: TextStyle(color: Dates.sameDay(_dayAt(i), now) ? scheme.onPrimary : scheme.onSurface)),
-                          ),
+                              style: context.text.bodySmall?.copyWith(color: Dates.sameDay(_dayAt(i), now) ? t.accent : null)),
+                          Text('${_dayAt(i).day}',
+                              style: context.text.titleLarge?.copyWith(
+                                color: Dates.sameDay(_dayAt(i), now) ? t.accent : t.ink,
+                                fontFeatures: tabularFigures,
+                              )),
                         ],
                       ),
                     ),
@@ -148,11 +147,12 @@ class _TimeGridState extends State<TimeGrid> {
                               width: gutter,
                               child: Transform.translate(
                                 offset: const Offset(0, -7),
-                                child: Text(h == 0 ? '' : '${h.toString().padLeft(2, '0')}:00',
-                                    textAlign: TextAlign.center, style: Theme.of(context).textTheme.labelSmall),
+                                child: Text(h == 0 ? '' : h.toString().padLeft(2, '0'),
+                                    textAlign: TextAlign.center,
+                                    style: context.text.bodySmall?.copyWith(fontSize: 12, color: t.faint, fontFeatures: tabularFigures)),
                               ),
                             ),
-                            Expanded(child: Divider(height: 1, color: scheme.outlineVariant)),
+                            Expanded(child: Divider(height: 1, color: t.line)),
                           ],
                         ),
                       ),
@@ -169,7 +169,13 @@ class _TimeGridState extends State<TimeGrid> {
                             final minutes = (d.localPosition.dy / widget.hourHeight * 60 / 30).floor() * 30;
                             widget.onCreate(_dayAt(i).add(Duration(minutes: minutes)), false);
                           },
-                          child: i > 0 ? VerticalDivider(width: 1, color: scheme.outlineVariant) : const SizedBox.expand(),
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: Dates.sameDay(_dayAt(i), now) && widget.days > 1 ? t.accent5 : null,
+                              border: i > 0 ? Border(left: BorderSide(color: t.line)) : null,
+                            ),
+                            child: const SizedBox.expand(),
+                          ),
                         ),
                       ),
                     // events
@@ -181,7 +187,7 @@ class _TimeGridState extends State<TimeGrid> {
                         top: (now.hour + now.minute / 60) * widget.hourHeight - 1,
                         left: gutter + _nowIndex(now) * colWidth,
                         width: colWidth,
-                        child: Container(height: 2, color: scheme.error),
+                        child: Container(height: 2, color: t.danger),
                       ),
                   ],
                 ),
@@ -279,8 +285,13 @@ class _TimeGridState extends State<TimeGrid> {
     final height = math.max(minHeight, (endOff - startOff).inMinutes / 60 * widget.hourHeight);
     final w = colWidth / p.columns;
     final cal = widget.calendars[p.occurrence.calendarId];
-    final color = colorFromHex(cal?.color ?? '#3B82F6');
+    final color = colorFromHex(cal?.color ?? '#4F5BD5');
     final readOnly = cal?.source == 'ics';
+    final t = context.tokens;
+    final now = DateTime.now();
+    // only the event happening right now is solid; everything else is a soft tint
+    final solid = p.occurrence.start.isBefore(now) && p.occurrence.end.isAfter(now);
+    final fg = solid ? Colors.white : color;
     return Positioned(
       top: top,
       left: gutter + (dayIndex + dayShift) * colWidth + p.column * w + 1,
@@ -299,21 +310,31 @@ class _TimeGridState extends State<TimeGrid> {
           opacity: isDragging ? 0.7 : 1,
           child: Container(
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.85),
-              borderRadius: BorderRadius.circular(6),
-              border: isDragging ? Border.all(color: Theme.of(context).colorScheme.onSurface, width: 1.5) : null,
+              color: solid ? color : color.withValues(alpha: .14),
+              borderRadius: const BorderRadius.horizontal(left: Radius.circular(4), right: Radius.circular(Radii.sm)),
+              border: isDragging
+                  ? Border.all(color: t.ink, width: 1.5)
+                  : Border(left: BorderSide(color: color, width: 3)),
+              boxShadow: solid ? [BoxShadow(color: color.withValues(alpha: .32), blurRadius: 16, offset: const Offset(0, 6))] : null,
             ),
-            padding: const EdgeInsets.fromLTRB(6, 3, 6, 0),
+            padding: const EdgeInsets.fromLTRB(Space.sm - 2, Space.xs, Space.sm - 2, 0),
             clipBehavior: Clip.hardEdge,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: Text(
-                    '${p.occurrence.title}\n${Dates.time.format(p.occurrence.start.toLocal())}',
-                    style: const TextStyle(color: Colors.white, fontSize: 12, height: 1.2),
-                    overflow: TextOverflow.fade,
-                  ),
+                  child: LayoutBuilder(builder: (context, c) {
+                    // one line per 16 px; the time only when there is room for it
+                    // narrow columns (phone week view) never wrap: words would break mid-letter
+                    final lines = c.maxWidth < 96 ? math.min(2, (c.maxHeight / 16).floor()) : (c.maxHeight / 16).floor();
+                    final style = TextStyle(fontFamily: 'Inter', color: fg, fontSize: 12, height: 1.3, fontWeight: FontWeight.w600, fontFeatures: tabularFigures);
+                    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text(p.occurrence.title, maxLines: lines > 2 ? lines - 1 : 1, overflow: TextOverflow.ellipsis, softWrap: lines > 2, style: style),
+                      if (lines >= 2)
+                        Text(Dates.time.format(p.occurrence.start.toLocal()),
+                            maxLines: 1, overflow: TextOverflow.clip, style: style.copyWith(fontWeight: FontWeight.w400)),
+                    ]);
+                  }),
                 ),
                 if (!readOnly)
                   GestureDetector(
@@ -328,10 +349,10 @@ class _TimeGridState extends State<TimeGrid> {
                       _resizeDuration = dur < snap ? snap : dur;
                     }),
                     onVerticalDragEnd: (_) => _commitResize(),
-                    child: const SizedBox(
+                    child: SizedBox(
                       height: 10,
                       width: double.infinity,
-                      child: Center(child: Icon(Icons.drag_handle, size: 12, color: Colors.white70)),
+                      child: Center(child: Icon(Icons.drag_handle_rounded, size: 12, color: fg.withValues(alpha: .6))),
                     ),
                   ),
               ],
@@ -398,8 +419,14 @@ class _Chip extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.fromLTRB(1, 1, 1, 1),
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-        decoration: BoxDecoration(color: colorFromHex(calendar?.color ?? '#3B82F6'), borderRadius: BorderRadius.circular(4)),
-        child: Text(occurrence.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: 11)),
+        decoration: BoxDecoration(
+          color: colorFromHex(calendar?.color ?? '#4F5BD5').withValues(alpha: .14),
+          borderRadius: BorderRadius.circular(Radii.sm),
+        ),
+        child: Text(occurrence.title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontFamily: 'Inter', color: colorFromHex(calendar?.color ?? '#4F5BD5'), fontSize: 12, fontWeight: FontWeight.w600)),
       ),
     );
   }

@@ -290,5 +290,168 @@
     }
   },
   "chooseCalendar": "Takvim seç",
-  "none": "Yok"
+  "none": "Yok",
+  "tabToday": "Bugün",
+  "greetingMorning": "Günaydın",
+  "greetingDay": "İyi günler",
+  "greetingEvening": "İyi akşamlar",
+  "greetingNight": "İyi geceler",
+  "greetingWithName": "{greeting}, {name}",
+  "@greetingWithName": {
+    "placeholders": {
+      "greeting": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "nextUp": "Sıradaki",
+  "happeningNow": "Şu an",
+  "inMinutes": "{minutes} dk sonra",
+  "@inMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "inHoursMinutes": "{hours} sa {minutes} dk sonra",
+  "@inHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "inHours": "{hours} sa sonra",
+  "@inHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "endsInMinutes": "{minutes} dk kaldı",
+  "@endsInMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "tomorrowFirst": "Yarın ilk etkinlik",
+  "tomorrow": "Yarın",
+  "eventsCount": "{count, plural, =0{Etkinlik yok} other{{count} etkinlik}}",
+  "@eventsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "daySummary": "Bugün {events} etkinlik, {done}/{total} görev tamam. Güzel bir gündü.",
+  "@daySummary": {
+    "placeholders": {
+      "events": {
+        "type": "int"
+      },
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "freeDayTitle": "Takvimin boş",
+  "freeDayBody": "Bugün etkinlik yok. Bir şey planlamak istersen aşağıya yazman yeter.",
+  "captureHintToday": "Ne var aklında?",
+  "captureHintCalendar": "Bu güne ekle…",
+  "captureHintNotes": "Yeni not…",
+  "captureHintTasks": "Yeni görev…",
+  "tasksAllDone": "Hepsi tamam, harikasın",
+  "tasksGoingWell": "Bugün iyi gidiyorsun",
+  "tasksStart": "Hadi başlayalım",
+  "tasksNoneToday": "Bugün için görev yok",
+  "tasksRemaining": "{count} görev kaldı",
+  "@tasksRemaining": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "overdueCount": "{count, plural, =1{biri gecikmiş} other{{count} tanesi gecikmiş}}",
+  "@overdueCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "later": "Daha sonra",
+  "doneSection": "Tamamlananlar",
+  "emptyTasksTitle": "Her şey yolunda",
+  "emptyTasksBody": "Bekleyen görev yok. Aklına bir şey gelirse aşağıya yaz, tarihini ben anlarım.",
+  "emptyNotesTitle": "İlk notunu yaz",
+  "emptyNotesBody": "Fikirler, listeler, toplantı notları. Markdown ve #etiket desteklenir.",
+  "exampleTask1": "yarın faturayı öde",
+  "exampleTask2": "cuma rapor gönder",
+  "exampleNote1": "Kitap önerileri",
+  "exampleEvent1": "yarın 15:00 toplantı",
+  "pinnedSection": "Sabitlenmiş",
+  "recentNotes": "Son düzenlenenler",
+  "recentSearches": "Son aramalar",
+  "tagsSection": "Etiketler",
+  "linkedThisWeek": "Bu haftanın etkinliklerine bağlı notlar",
+  "noResults": "Sonuç yok",
+  "captureUnderstood": "Şöyle anladım — düzeltmek için dokun",
+  "captureKeysHint": "↵ kaydet · ⇧↵ not",
+  "savedEvent": "Takvime eklendi",
+  "savedNote": "Not kaydedildi",
+  "savedTask": "Görev eklendi",
+  "willRemindAt": "Hatırlatma: {when}",
+  "@willRemindAt": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "undo": "Geri al",
+  "captureTask": "Görev",
+  "captureNoteShort": "Not",
+  "welcomeBack": "Tekrar hoş geldin",
+  "createAccount": "Hesap oluştur",
+  "haveAccount": "Zaten hesabım var",
+  "loginSubtitle": "Takvimin ve notların cihazlarınla senkron.",
+  "registerSubtitle": "Birkaç saniyede başla; verilerin kendi sunucunda kalır.",
+  "serverLine": "Sunucu: {host}",
+  "@serverLine": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "change": "değiştir",
+  "eventTitle": "Etkinlik",
+  "durationLabel": "{text}",
+  "@durationLabel": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "addNoteToEvent": "Bu etkinliğe not ekle",
+  "newBadge": "Yeni",
+  "thisWeek": "Bu hafta",
+  "syncOk": "Senkron",
+  "titleHint": "Başlık"
 }

@@ -90,6 +90,13 @@ lib/features/notes             list + FTS search, Markdown editor with autosave
   refreshed every 12 hours; they are never pushed to the server.
 * Shortcuts: ←/→ day, ↑/↓ week, PgUp/PgDn period, T today, M/W/D/A views, ⌘N new, ⌘S save.
 
+## Design
+
+The UI follows `docs/design/mockups.html`: tokens in `lib/core/theme.dart`, shared widgets
+(`AppCard`, `Pill`, `PageHeader`, `EmptyState`, `CaptureBar`, `PopCheck`, `ProgressRing`) in
+`lib/core/ui.dart`. Tabs: Bugün / Takvim / Notlar / Görevler, with the capture bar above the
+navigation.
+
 ## Quick capture (phase 4)
 
 * `core/capture_parser.dart` turns one Turkish line into an event or a note

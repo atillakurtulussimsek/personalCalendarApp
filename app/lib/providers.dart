@@ -59,6 +59,11 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) => AuthRepository(
       ref.watch(databaseProvider),
     ));
 
+final userEmailProvider = FutureProvider<String?>((ref) {
+  ref.watch(sessionProvider);
+  return ref.watch(authRepositoryProvider).email;
+});
+
 final calendarRepositoryProvider =
     Provider<CalendarRepository>((ref) => CalendarRepository(ref.watch(databaseProvider), ref.watch(syncServiceProvider)));
 final eventRepositoryProvider =

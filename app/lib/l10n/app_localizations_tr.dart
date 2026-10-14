@@ -598,4 +598,245 @@ class L10nTr extends L10n {
 
   @override
   String get none => 'Yok';
+
+  @override
+  String get tabToday => 'Bugün';
+
+  @override
+  String get greetingMorning => 'Günaydın';
+
+  @override
+  String get greetingDay => 'İyi günler';
+
+  @override
+  String get greetingEvening => 'İyi akşamlar';
+
+  @override
+  String get greetingNight => 'İyi geceler';
+
+  @override
+  String greetingWithName(String greeting, String name) {
+    return '$greeting, $name';
+  }
+
+  @override
+  String get nextUp => 'Sıradaki';
+
+  @override
+  String get happeningNow => 'Şu an';
+
+  @override
+  String inMinutes(int minutes) {
+    return '$minutes dk sonra';
+  }
+
+  @override
+  String inHoursMinutes(int hours, int minutes) {
+    return '$hours sa $minutes dk sonra';
+  }
+
+  @override
+  String inHours(int hours) {
+    return '$hours sa sonra';
+  }
+
+  @override
+  String endsInMinutes(int minutes) {
+    return '$minutes dk kaldı';
+  }
+
+  @override
+  String get tomorrowFirst => 'Yarın ilk etkinlik';
+
+  @override
+  String get tomorrow => 'Yarın';
+
+  @override
+  String eventsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count etkinlik',
+      zero: 'Etkinlik yok',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String daySummary(int events, int done, int total) {
+    return 'Bugün $events etkinlik, $done/$total görev tamam. Güzel bir gündü.';
+  }
+
+  @override
+  String get freeDayTitle => 'Takvimin boş';
+
+  @override
+  String get freeDayBody =>
+      'Bugün etkinlik yok. Bir şey planlamak istersen aşağıya yazman yeter.';
+
+  @override
+  String get captureHintToday => 'Ne var aklında?';
+
+  @override
+  String get captureHintCalendar => 'Bu güne ekle…';
+
+  @override
+  String get captureHintNotes => 'Yeni not…';
+
+  @override
+  String get captureHintTasks => 'Yeni görev…';
+
+  @override
+  String get tasksAllDone => 'Hepsi tamam, harikasın';
+
+  @override
+  String get tasksGoingWell => 'Bugün iyi gidiyorsun';
+
+  @override
+  String get tasksStart => 'Hadi başlayalım';
+
+  @override
+  String get tasksNoneToday => 'Bugün için görev yok';
+
+  @override
+  String tasksRemaining(int count) {
+    return '$count görev kaldı';
+  }
+
+  @override
+  String overdueCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tanesi gecikmiş',
+      one: 'biri gecikmiş',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get later => 'Daha sonra';
+
+  @override
+  String get doneSection => 'Tamamlananlar';
+
+  @override
+  String get emptyTasksTitle => 'Her şey yolunda';
+
+  @override
+  String get emptyTasksBody =>
+      'Bekleyen görev yok. Aklına bir şey gelirse aşağıya yaz, tarihini ben anlarım.';
+
+  @override
+  String get emptyNotesTitle => 'İlk notunu yaz';
+
+  @override
+  String get emptyNotesBody =>
+      'Fikirler, listeler, toplantı notları. Markdown ve #etiket desteklenir.';
+
+  @override
+  String get exampleTask1 => 'yarın faturayı öde';
+
+  @override
+  String get exampleTask2 => 'cuma rapor gönder';
+
+  @override
+  String get exampleNote1 => 'Kitap önerileri';
+
+  @override
+  String get exampleEvent1 => 'yarın 15:00 toplantı';
+
+  @override
+  String get pinnedSection => 'Sabitlenmiş';
+
+  @override
+  String get recentNotes => 'Son düzenlenenler';
+
+  @override
+  String get recentSearches => 'Son aramalar';
+
+  @override
+  String get tagsSection => 'Etiketler';
+
+  @override
+  String get linkedThisWeek => 'Bu haftanın etkinliklerine bağlı notlar';
+
+  @override
+  String get noResults => 'Sonuç yok';
+
+  @override
+  String get captureUnderstood => 'Şöyle anladım — düzeltmek için dokun';
+
+  @override
+  String get captureKeysHint => '↵ kaydet · ⇧↵ not';
+
+  @override
+  String get savedEvent => 'Takvime eklendi';
+
+  @override
+  String get savedNote => 'Not kaydedildi';
+
+  @override
+  String get savedTask => 'Görev eklendi';
+
+  @override
+  String willRemindAt(String when) {
+    return 'Hatırlatma: $when';
+  }
+
+  @override
+  String get undo => 'Geri al';
+
+  @override
+  String get captureTask => 'Görev';
+
+  @override
+  String get captureNoteShort => 'Not';
+
+  @override
+  String get welcomeBack => 'Tekrar hoş geldin';
+
+  @override
+  String get createAccount => 'Hesap oluştur';
+
+  @override
+  String get haveAccount => 'Zaten hesabım var';
+
+  @override
+  String get loginSubtitle => 'Takvimin ve notların cihazlarınla senkron.';
+
+  @override
+  String get registerSubtitle =>
+      'Birkaç saniyede başla; verilerin kendi sunucunda kalır.';
+
+  @override
+  String serverLine(String host) {
+    return 'Sunucu: $host';
+  }
+
+  @override
+  String get change => 'değiştir';
+
+  @override
+  String get eventTitle => 'Etkinlik';
+
+  @override
+  String durationLabel(String text) {
+    return '$text';
+  }
+
+  @override
+  String get addNoteToEvent => 'Bu etkinliğe not ekle';
+
+  @override
+  String get newBadge => 'Yeni';
+
+  @override
+  String get thisWeek => 'Bu hafta';
+
+  @override
+  String get syncOk => 'Senkron';
+
+  @override
+  String get titleHint => 'Başlık';
 }

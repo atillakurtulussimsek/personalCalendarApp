@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/platform_info.dart';
+import '../../core/theme.dart';
 import '../../data/api/api_client.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers.dart';
@@ -72,100 +73,116 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  bool _editServer = false;
+
   @override
   Widget build(BuildContext context) {
     final l = L10n.of(context);
+    final t = context.tokens;
+    final host = Uri.tryParse(_server.text)?.host ?? '';
+    final showServerField = !PlatformInfo.isWeb && (_editServer || _server.text.trim().isEmpty);
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+      body: SafeArea(
+        child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
+            constraints: const BoxConstraints(maxWidth: 420),
             child: Form(
               key: _form,
               child: AutofillGroup(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Icon(
-                      Icons.calendar_month,
-                      size: 64,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      l.appTitle,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    const SizedBox(height: 24),
-                    if (!PlatformInfo.isWeb)
-                      TextFormField(
-                        controller: _server,
-                        decoration: InputDecoration(
-                          labelText: l.serverUrl,
-                          hintText: l.serverUrlHint,
-                        ),
-                        keyboardType: TextInputType.url,
-                        autocorrect: false,
-                        validator: (v) => (v == null || v.trim().isEmpty)
-                            ? l.serverUrlHint
-                            : null,
-                      ),
-                    if (!PlatformInfo.isWeb) const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _email,
-                      decoration: InputDecoration(labelText: l.email),
-                      keyboardType: TextInputType.emailAddress,
-                      autofillHints: const [AutofillHints.email],
-                      autocorrect: false,
-                      validator: (v) => (v == null || !v.contains('@'))
-                          ? l.invalidEmail
-                          : null,
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _password,
-                      decoration: InputDecoration(labelText: l.password),
-                      obscureText: true,
-                      autofillHints: const [AutofillHints.password],
-                      onFieldSubmitted: (_) => _submit(),
-                      validator: (v) => (v == null || v.length < 8)
-                          ? l.passwordTooShort
-                          : null,
-                    ),
-                    const SizedBox(height: 20),
-                    if (_error != null)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Text(
-                          _error!,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.error,
+                child: CustomScrollView(slivers: [
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: Space.xl),
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                        const SizedBox(height: Space.huge + Space.lg),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Container(
+                            width: 64,
+                            height: 64,
+                            decoration: BoxDecoration(
+                              color: t.accent5,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [BoxShadow(color: t.accent.withValues(alpha: .12), blurRadius: 32, spreadRadius: 4)],
+                            ),
+                            child: Icon(Icons.calendar_today_rounded, color: t.accent, size: 32),
                           ),
                         ),
-                      ),
-                    FilledButton(
-                      onPressed: _busy ? null : _submit,
-                      child: _busy
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(_register ? l.register : l.login),
+                        const SizedBox(height: Space.xl),
+                        Text(_register ? l.createAccount : l.welcomeBack, style: context.text.headlineSmall),
+                        const SizedBox(height: Space.sm),
+                        Text(_register ? l.registerSubtitle : l.loginSubtitle, style: context.text.bodyMedium),
+                        const SizedBox(height: Space.huge),
+                        if (showServerField) ...[
+                          TextFormField(
+                            controller: _server,
+                            decoration: InputDecoration(hintText: l.serverUrlHint, prefixIcon: const Icon(Icons.dns_outlined)),
+                            keyboardType: TextInputType.url,
+                            autocorrect: false,
+                            onChanged: (_) => setState(() {}),
+                            validator: (v) => (v == null || v.trim().isEmpty) ? l.serverUrlHint : null,
+                          ),
+                          const SizedBox(height: Space.md),
+                        ],
+                        TextFormField(
+                          controller: _email,
+                          decoration: InputDecoration(hintText: l.email, prefixIcon: const Icon(Icons.mail_outline_rounded)),
+                          keyboardType: TextInputType.emailAddress,
+                          autofillHints: const [AutofillHints.email],
+                          autocorrect: false,
+                          validator: (v) => (v == null || !v.contains('@')) ? l.invalidEmail : null,
+                        ),
+                        const SizedBox(height: Space.md),
+                        TextFormField(
+                          controller: _password,
+                          decoration: InputDecoration(hintText: l.password, prefixIcon: const Icon(Icons.lock_outline_rounded)),
+                          obscureText: true,
+                          autofillHints: [_register ? AutofillHints.newPassword : AutofillHints.password],
+                          onFieldSubmitted: (_) => _submit(),
+                          validator: (v) => (v == null || v.length < 8) ? l.passwordTooShort : null,
+                        ),
+                        if (!PlatformInfo.isWeb && !showServerField) ...[
+                          const SizedBox(height: Space.md),
+                          Padding(
+                            padding: const EdgeInsets.only(left: Space.xs),
+                            child: Text.rich(
+                              TextSpan(text: '${l.serverLine(host)} · ', children: [
+                                WidgetSpan(
+                                  alignment: PlaceholderAlignment.baseline,
+                                  baseline: TextBaseline.alphabetic,
+                                  child: GestureDetector(
+                                    onTap: () => setState(() => _editServer = true),
+                                    child: Text(l.change, style: context.text.labelMedium?.copyWith(color: t.accent)),
+                                  ),
+                                ),
+                              ]),
+                              style: context.text.bodySmall,
+                            ),
+                          ),
+                        ],
+                        if (_error != null) ...[
+                          const SizedBox(height: Space.lg),
+                          Text(_error!, style: context.text.bodySmall?.copyWith(color: t.danger)),
+                        ],
+                        const Spacer(),
+                        const SizedBox(height: Space.xl),
+                        FilledButton(
+                          onPressed: _busy ? null : _submit,
+                          child: _busy
+                              ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                              : Text(_register ? l.register : l.login),
+                        ),
+                        const SizedBox(height: Space.sm),
+                        TextButton(
+                          onPressed: _busy ? null : () => setState(() => _register = !_register),
+                          child: Text(_register ? l.haveAccount : l.createAccount),
+                        ),
+                        const SizedBox(height: Space.xl),
+                      ]),
                     ),
-                    TextButton(
-                      onPressed: _busy
-                          ? null
-                          : () => setState(() => _register = !_register),
-                      child: Text(
-                        _register ? l.haveAccountLogin : l.noAccountRegister,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ]),
               ),
             ),
           ),

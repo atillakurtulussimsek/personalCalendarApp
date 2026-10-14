@@ -1190,6 +1190,408 @@ abstract class L10n {
   /// In tr, this message translates to:
   /// **'Yok'**
   String get none;
+
+  /// No description provided for @tabToday.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün'**
+  String get tabToday;
+
+  /// No description provided for @greetingMorning.
+  ///
+  /// In tr, this message translates to:
+  /// **'Günaydın'**
+  String get greetingMorning;
+
+  /// No description provided for @greetingDay.
+  ///
+  /// In tr, this message translates to:
+  /// **'İyi günler'**
+  String get greetingDay;
+
+  /// No description provided for @greetingEvening.
+  ///
+  /// In tr, this message translates to:
+  /// **'İyi akşamlar'**
+  String get greetingEvening;
+
+  /// No description provided for @greetingNight.
+  ///
+  /// In tr, this message translates to:
+  /// **'İyi geceler'**
+  String get greetingNight;
+
+  /// No description provided for @greetingWithName.
+  ///
+  /// In tr, this message translates to:
+  /// **'{greeting}, {name}'**
+  String greetingWithName(String greeting, String name);
+
+  /// No description provided for @nextUp.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sıradaki'**
+  String get nextUp;
+
+  /// No description provided for @happeningNow.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şu an'**
+  String get happeningNow;
+
+  /// No description provided for @inMinutes.
+  ///
+  /// In tr, this message translates to:
+  /// **'{minutes} dk sonra'**
+  String inMinutes(int minutes);
+
+  /// No description provided for @inHoursMinutes.
+  ///
+  /// In tr, this message translates to:
+  /// **'{hours} sa {minutes} dk sonra'**
+  String inHoursMinutes(int hours, int minutes);
+
+  /// No description provided for @inHours.
+  ///
+  /// In tr, this message translates to:
+  /// **'{hours} sa sonra'**
+  String inHours(int hours);
+
+  /// No description provided for @endsInMinutes.
+  ///
+  /// In tr, this message translates to:
+  /// **'{minutes} dk kaldı'**
+  String endsInMinutes(int minutes);
+
+  /// No description provided for @tomorrowFirst.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yarın ilk etkinlik'**
+  String get tomorrowFirst;
+
+  /// No description provided for @tomorrow.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yarın'**
+  String get tomorrow;
+
+  /// No description provided for @eventsCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count, plural, =0{Etkinlik yok} other{{count} etkinlik}}'**
+  String eventsCount(int count);
+
+  /// No description provided for @daySummary.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün {events} etkinlik, {done}/{total} görev tamam. Güzel bir gündü.'**
+  String daySummary(int events, int done, int total);
+
+  /// No description provided for @freeDayTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Takvimin boş'**
+  String get freeDayTitle;
+
+  /// No description provided for @freeDayBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün etkinlik yok. Bir şey planlamak istersen aşağıya yazman yeter.'**
+  String get freeDayBody;
+
+  /// No description provided for @captureHintToday.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ne var aklında?'**
+  String get captureHintToday;
+
+  /// No description provided for @captureHintCalendar.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu güne ekle…'**
+  String get captureHintCalendar;
+
+  /// No description provided for @captureHintNotes.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni not…'**
+  String get captureHintNotes;
+
+  /// No description provided for @captureHintTasks.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni görev…'**
+  String get captureHintTasks;
+
+  /// No description provided for @tasksAllDone.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hepsi tamam, harikasın'**
+  String get tasksAllDone;
+
+  /// No description provided for @tasksGoingWell.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün iyi gidiyorsun'**
+  String get tasksGoingWell;
+
+  /// No description provided for @tasksStart.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hadi başlayalım'**
+  String get tasksStart;
+
+  /// No description provided for @tasksNoneToday.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün için görev yok'**
+  String get tasksNoneToday;
+
+  /// No description provided for @tasksRemaining.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} görev kaldı'**
+  String tasksRemaining(int count);
+
+  /// No description provided for @overdueCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count, plural, =1{biri gecikmiş} other{{count} tanesi gecikmiş}}'**
+  String overdueCount(int count);
+
+  /// No description provided for @later.
+  ///
+  /// In tr, this message translates to:
+  /// **'Daha sonra'**
+  String get later;
+
+  /// No description provided for @doneSection.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlananlar'**
+  String get doneSection;
+
+  /// No description provided for @emptyTasksTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Her şey yolunda'**
+  String get emptyTasksTitle;
+
+  /// No description provided for @emptyTasksBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bekleyen görev yok. Aklına bir şey gelirse aşağıya yaz, tarihini ben anlarım.'**
+  String get emptyTasksBody;
+
+  /// No description provided for @emptyNotesTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'İlk notunu yaz'**
+  String get emptyNotesTitle;
+
+  /// No description provided for @emptyNotesBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fikirler, listeler, toplantı notları. Markdown ve #etiket desteklenir.'**
+  String get emptyNotesBody;
+
+  /// No description provided for @exampleTask1.
+  ///
+  /// In tr, this message translates to:
+  /// **'yarın faturayı öde'**
+  String get exampleTask1;
+
+  /// No description provided for @exampleTask2.
+  ///
+  /// In tr, this message translates to:
+  /// **'cuma rapor gönder'**
+  String get exampleTask2;
+
+  /// No description provided for @exampleNote1.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kitap önerileri'**
+  String get exampleNote1;
+
+  /// No description provided for @exampleEvent1.
+  ///
+  /// In tr, this message translates to:
+  /// **'yarın 15:00 toplantı'**
+  String get exampleEvent1;
+
+  /// No description provided for @pinnedSection.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sabitlenmiş'**
+  String get pinnedSection;
+
+  /// No description provided for @recentNotes.
+  ///
+  /// In tr, this message translates to:
+  /// **'Son düzenlenenler'**
+  String get recentNotes;
+
+  /// No description provided for @recentSearches.
+  ///
+  /// In tr, this message translates to:
+  /// **'Son aramalar'**
+  String get recentSearches;
+
+  /// No description provided for @tagsSection.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etiketler'**
+  String get tagsSection;
+
+  /// No description provided for @linkedThisWeek.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu haftanın etkinliklerine bağlı notlar'**
+  String get linkedThisWeek;
+
+  /// No description provided for @noResults.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sonuç yok'**
+  String get noResults;
+
+  /// No description provided for @captureUnderstood.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şöyle anladım — düzeltmek için dokun'**
+  String get captureUnderstood;
+
+  /// No description provided for @captureKeysHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'↵ kaydet · ⇧↵ not'**
+  String get captureKeysHint;
+
+  /// No description provided for @savedEvent.
+  ///
+  /// In tr, this message translates to:
+  /// **'Takvime eklendi'**
+  String get savedEvent;
+
+  /// No description provided for @savedNote.
+  ///
+  /// In tr, this message translates to:
+  /// **'Not kaydedildi'**
+  String get savedNote;
+
+  /// No description provided for @savedTask.
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev eklendi'**
+  String get savedTask;
+
+  /// No description provided for @willRemindAt.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hatırlatma: {when}'**
+  String willRemindAt(String when);
+
+  /// No description provided for @undo.
+  ///
+  /// In tr, this message translates to:
+  /// **'Geri al'**
+  String get undo;
+
+  /// No description provided for @captureTask.
+  ///
+  /// In tr, this message translates to:
+  /// **'Görev'**
+  String get captureTask;
+
+  /// No description provided for @captureNoteShort.
+  ///
+  /// In tr, this message translates to:
+  /// **'Not'**
+  String get captureNoteShort;
+
+  /// No description provided for @welcomeBack.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tekrar hoş geldin'**
+  String get welcomeBack;
+
+  /// No description provided for @createAccount.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hesap oluştur'**
+  String get createAccount;
+
+  /// No description provided for @haveAccount.
+  ///
+  /// In tr, this message translates to:
+  /// **'Zaten hesabım var'**
+  String get haveAccount;
+
+  /// No description provided for @loginSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Takvimin ve notların cihazlarınla senkron.'**
+  String get loginSubtitle;
+
+  /// No description provided for @registerSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Birkaç saniyede başla; verilerin kendi sunucunda kalır.'**
+  String get registerSubtitle;
+
+  /// No description provided for @serverLine.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sunucu: {host}'**
+  String serverLine(String host);
+
+  /// No description provided for @change.
+  ///
+  /// In tr, this message translates to:
+  /// **'değiştir'**
+  String get change;
+
+  /// No description provided for @eventTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Etkinlik'**
+  String get eventTitle;
+
+  /// No description provided for @durationLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'{text}'**
+  String durationLabel(String text);
+
+  /// No description provided for @addNoteToEvent.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu etkinliğe not ekle'**
+  String get addNoteToEvent;
+
+  /// No description provided for @newBadge.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeni'**
+  String get newBadge;
+
+  /// No description provided for @thisWeek.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu hafta'**
+  String get thisWeek;
+
+  /// No description provided for @syncOk.
+  ///
+  /// In tr, this message translates to:
+  /// **'Senkron'**
+  String get syncOk;
+
+  /// No description provided for @titleHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Başlık'**
+  String get titleHint;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

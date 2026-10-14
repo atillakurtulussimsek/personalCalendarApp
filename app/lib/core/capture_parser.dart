@@ -173,6 +173,14 @@ class CaptureParser {
     final loc = _locationRe.firstMatch(text);
     if (loc != null) {
       location = loc.group(1)!.trim();
+      // recover the original casing ("Konferans Salonu") from the raw input
+      final at = input.indexOf('@');
+      if (at >= 0) {
+        final raw = input.substring(at + 1).trimLeft();
+        if (raw.length >= location.length && _normalize(raw.substring(0, location.length)) == location) {
+          location = raw.substring(0, location.length);
+        }
+      }
       consume(loc, CapturePartType.location);
     }
 

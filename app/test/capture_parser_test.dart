@@ -21,6 +21,7 @@ void main() {
     expect(r.start, DateTime(2026, 10, 16, 10));
     expect(r.end, DateTime(2026, 10, 16, 12));
     expect(r.location, 'konferans salonu');
+    expect(p.parse('yarın 10:00 sunum @Konferans Salonu').location, 'Konferans Salonu');
   });
 
   test('her pazartesi 9:00 haftalık toplantı → weekly RRULE starting next Monday', () {

@@ -6,7 +6,9 @@ class Dates {
   static final dayShort = DateFormat('d MMM EEE', 'tr');
   static final monthYear = DateFormat('MMMM yyyy', 'tr');
   static final time = DateFormat('HH:mm', 'tr');
-  static final dateTime = DateFormat('d MMM HH:mm', 'tr');
+  static final dateTime = DateFormat('EEE d MMM HH:mm', 'tr');
+  static final weekdayShort = DateFormat('EEE', 'tr');
+  static final dayMonthShort = DateFormat('d MMM', 'tr');
 
   static DateTime startOfDay(DateTime d) {
     final l = d.toLocal();

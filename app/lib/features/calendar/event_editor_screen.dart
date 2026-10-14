@@ -10,6 +10,7 @@ import '../../core/dates.dart';
 import '../../core/recurrence.dart';
 import '../../core/theme.dart';
 import '../../core/tz.dart';
+import '../../core/ui.dart';
 import '../../data/db/database.dart';
 import '../../data/repositories/repositories.dart';
 import '../../data/sync/mappers.dart';
@@ -256,15 +257,74 @@ class _EventEditorScreenState extends ConsumerState<EventEditorScreen> {
     if (v != null) setState(() => _reminders = ([..._reminders, v]..sort()));
   }
 
+  String _duration() {
+    if (_allDay) {
+      final days = Dates.startOfDay(_end).difference(Dates.startOfDay(_start)).inDays + 1;
+      return '$days gün';
+    }
+    final m = _end.difference(_start).inMinutes;
+    if (m <= 0) return '';
+    if (m < 60) return '$m dk';
+    return m % 60 == 0 ? '${m ~/ 60} saat' : '${m ~/ 60} sa ${m % 60} dk';
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = L10n.of(context);
+    final t = context.tokens;
     final calendars = (ref.watch(calendarsProvider).value ?? const <Calendar>[]).where((c) => c.source == 'local').toList();
     final allCalendars = ref.watch(calendarsProvider).value ?? const <Calendar>[];
     _isSubscription = allCalendars.any((c) => c.id == _calendarId && c.source == 'ics');
     final fmt = _allDay ? Dates.dayShort : Dates.dateTime;
     final notesStream = _event == null ? null : ref.watch(_eventNotesProvider(_event!.id));
     final readOnly = _readOnly;
+    final calId = calendars.any((c) => c.id == _calendarId)
+        ? _calendarId
+        : (calendars.isEmpty ? null : calendars.firstWhere((c) => c.isDefault, orElse: () => calendars.first).id);
+    final cal = allCalendars.where((c) => c.id == (_calendarId ?? calId)).firstOrNull;
+
+    Widget field({required IconData icon, required Widget child, Widget? trailing, VoidCallback? onTap}) => InkWell(
+          onTap: readOnly ? null : onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: Space.lg),
+            child: Row(children: [
+              Icon(icon, size: 20, color: t.secondary),
+              const SizedBox(width: Space.lg),
+              Expanded(child: child),
+              ?trailing,
+            ]),
+          ),
+        );
+
+    Widget group(List<Widget> children) => AppCard(
+          padding: const EdgeInsets.symmetric(horizontal: Space.xl),
+          child: Column(children: [
+            for (var i = 0; i < children.length; i++) ...[if (i > 0) const Divider(), children[i]],
+          ]),
+        );
+
+    Widget timeValue(String label, DateTime value) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(label, style: context.text.bodySmall),
+          Text(fmt.format(value), style: context.text.titleSmall?.copyWith(fontFeatures: tabularFigures)),
+        ]);
+
+    Future<void> pickCalendar() async {
+      final picked = await showModalBottomSheet<String>(
+        context: context,
+        builder: (ctx) => SafeArea(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            for (final c in calendars)
+              ListTile(
+                leading: Dot(colorFromHex(c.color), size: 12),
+                title: Text(c.name),
+                trailing: c.id == calId ? Icon(Icons.check_rounded, color: t.accent) : null,
+                onTap: () => Navigator.pop(ctx, c.id),
+              ),
+          ]),
+        ),
+      );
+      if (picked != null) setState(() => _calendarId = picked);
+    }
 
     return CallbackShortcuts(
       bindings: {
@@ -274,152 +334,147 @@ class _EventEditorScreenState extends ConsumerState<EventEditorScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(_isNew ? l.newEvent : l.edit),
+          leadingWidth: 96,
+          leading: TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(l.cancel, style: TextStyle(color: t.body))),
+          title: Text(_isNew ? l.newEvent : l.eventTitle),
           actions: [
-            if (!_isNew && !readOnly) IconButton(tooltip: l.delete, icon: const Icon(Icons.delete_outline), onPressed: _delete),
-            if (!readOnly)
-              TextButton(
-                onPressed: _saving ? null : _save,
-                child: Text(l.save),
-              ),
+            if (!_isNew && !readOnly) IconButton(tooltip: l.delete, icon: Icon(Icons.delete_outline_rounded, color: t.secondary), onPressed: _delete),
+            if (!readOnly) TextButton(onPressed: _saving ? null : _save, child: Text(l.save, style: TextStyle(color: t.accent))),
+            const SizedBox(width: Space.sm),
           ],
         ),
         body: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+          padding: const EdgeInsets.fromLTRB(Space.lg, Space.sm, Space.lg, Space.huge),
           children: [
             TextField(
               controller: _title,
               readOnly: readOnly,
               autofocus: _isNew,
-              style: Theme.of(context).textTheme.titleLarge,
-              decoration: InputDecoration(hintText: l.title, border: InputBorder.none),
+              maxLines: null,
+              style: context.text.headlineSmall,
+              decoration: InputDecoration(
+                hintText: l.titleHint,
+                filled: false,
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+              ),
               textInputAction: TextInputAction.next,
             ),
-            const Divider(),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              secondary: const Icon(Icons.wb_sunny_outlined),
-              title: Text(l.allDay),
-              value: _allDay,
-              onChanged: readOnly ? null : (v) => setState(() => _allDay = v),
-            ),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.schedule),
-              title: Text(l.start),
-              trailing: Text(fmt.format(_start)),
-              onTap: readOnly ? null : () => _pick(true),
-            ),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.schedule_outlined),
-              title: Text(l.end),
-              trailing: Text(fmt.format(_end)),
-              onTap: readOnly ? null : () => _pick(false),
-            ),
-            if (!_allDay)
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.public),
-                title: Text(l.timezone),
-                trailing: Text(_timezone),
+            const SizedBox(height: Space.sm),
+            Wrap(spacing: Space.sm, runSpacing: Space.sm, children: [
+              if (cal != null)
+                Pill(neutral: true, leading: Dot(colorFromHex(cal.color)), label: cal.name, onTap: readOnly || calendars.length < 2 ? null : pickCalendar),
+              Pill(
+                neutral: _rrule == null,
+                icon: Icons.repeat_rounded,
+                label: _rrule == null ? l.noRepeat : describeRrule(_rrule),
+                onTap: readOnly || (widget.occurrence?.isException ?? false)
+                    ? null
+                    : () async {
+                        final r = await showRecurrencePicker(context, current: _rrule, start: _start);
+                        setState(() => _rrule = r);
+                      },
               ),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.repeat),
-              title: Text(l.repeat),
-              subtitle: _rrule == null ? null : Text(describeRrule(_rrule)),
-              trailing: Text(_rrule == null ? l.noRepeat : ''),
-              enabled: !readOnly && !(widget.occurrence?.isException ?? false),
-              onTap: () async {
-                final r = await showRecurrencePicker(context, current: _rrule, start: _start);
-                setState(() => _rrule = r);
-              },
-            ),
-            if (calendars.isNotEmpty)
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.calendar_today_outlined),
-                title: Text(l.calendar),
-                trailing: DropdownButton<String>(
-                  value: calendars.any((c) => c.id == _calendarId)
-                      ? _calendarId
-                      : calendars.firstWhere((c) => c.isDefault, orElse: () => calendars.first).id,
-                  underline: const SizedBox.shrink(),
-                  items: [
-                    for (final c in [...calendars, ...allCalendars.where((c) => c.source == 'ics' && c.id == _calendarId)])
-                      DropdownMenuItem(
-                        value: c.id,
-                        child: Row(mainAxisSize: MainAxisSize.min, children: [
-                          Icon(Icons.circle, size: 12, color: colorFromHex(c.color)),
-                          const SizedBox(width: 8),
-                          Text(c.name),
-                        ]),
-                      ),
-                  ],
-                  onChanged: readOnly ? null : (v) => setState(() => _calendarId = v),
+            ]),
+            const SizedBox(height: Space.xl),
+            group([
+              field(
+                icon: Icons.wb_sunny_outlined,
+                child: Text(l.allDay, style: context.text.bodyLarge),
+                trailing: Switch(value: _allDay, onChanged: readOnly ? null : (v) => setState(() => _allDay = v)),
+              ),
+              field(
+                icon: Icons.schedule_rounded,
+                child: timeValue(l.start, _start),
+                trailing: Text(_duration(), style: context.text.bodySmall),
+                onTap: () => _pick(true),
+              ),
+              field(icon: Icons.east_rounded, child: timeValue(l.end, _end), onTap: () => _pick(false)),
+              if (!_allDay)
+                field(icon: Icons.public_rounded, child: Text(_timezone, style: context.text.bodyMedium)),
+            ]),
+            const SizedBox(height: Space.lg),
+            group([
+              field(
+                icon: Icons.place_outlined,
+                child: TextField(
+                  controller: _location,
+                  readOnly: readOnly,
+                  decoration: InputDecoration(
+                    hintText: l.location,
+                    filled: false,
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                    isDense: true,
+                  ),
                 ),
               ),
-            TextField(
-              controller: _location,
-              readOnly: readOnly,
-              decoration: InputDecoration(prefixIcon: const Icon(Icons.place_outlined), labelText: l.location, border: InputBorder.none),
-            ),
-            TextField(
-              controller: _description,
-              readOnly: readOnly,
-              maxLines: null,
-              minLines: 2,
-              decoration: InputDecoration(prefixIcon: const Icon(Icons.notes_outlined), labelText: l.description, border: InputBorder.none),
-            ),
-            const Divider(),
-            Row(
-              children: [
-                const Icon(Icons.notifications_outlined),
-                const SizedBox(width: 16),
-                Text(l.reminders, style: Theme.of(context).textTheme.titleSmall),
-              ],
-            ),
-            Wrap(
-              spacing: 8,
-              children: [
-                for (final m in _reminders)
-                  InputChip(
-                    label: Text(_reminderLabel(l, m)),
-                    onDeleted: readOnly ? null : () => setState(() => _reminders = _reminders.where((x) => x != m).toList()),
-                  ),
-                if (!readOnly) ActionChip(avatar: const Icon(Icons.add, size: 18), label: Text(l.addReminder), onPressed: _addReminder),
-              ],
-            ),
-            if (_event != null) ...[
-              const Divider(),
-              Row(
-                children: [
-                  const Icon(Icons.sticky_note_2_outlined),
-                  const SizedBox(width: 16),
-                  Text(l.notes, style: Theme.of(context).textTheme.titleSmall),
-                  const Spacer(),
-                  TextButton.icon(
-                    icon: const Icon(Icons.add),
-                    label: Text(l.addNote),
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(builder: (_) => NoteEditorScreen(eventId: _event!.id)),
+              field(
+                icon: Icons.notifications_none_rounded,
+                child: Wrap(spacing: Space.sm, runSpacing: Space.sm, children: [
+                  for (final m in _reminders)
+                    Pill(
+                      label: _reminderLabel(l, m),
+                      onTap: readOnly ? null : () => setState(() => _reminders = _reminders.where((x) => x != m).toList()),
                     ),
-                  ),
-                ],
+                  if (!readOnly) Pill(neutral: true, icon: Icons.add_rounded, label: l.addReminder, onTap: _addReminder),
+                ]),
               ),
-              for (final n in notesStream?.value ?? const <Note>[])
-                ListTile(
-                  dense: true,
-                  leading: const Icon(Icons.notes, size: 18),
-                  title: Text(n.title.isEmpty ? l.untitled : n.title),
-                  onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => NoteEditorScreen(noteId: n.id))),
+              field(
+                icon: Icons.notes_rounded,
+                child: TextField(
+                  controller: _description,
+                  readOnly: readOnly,
+                  maxLines: null,
+                  decoration: InputDecoration(
+                    hintText: l.description,
+                    filled: false,
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                    isDense: true,
+                  ),
                 ),
+              ),
+            ]),
+            if (_event != null) ...[
+              const SizedBox(height: Space.lg),
+              for (final n in notesStream?.value ?? const <Note>[])
+                Padding(
+                  padding: const EdgeInsets.only(bottom: Space.sm),
+                  child: AppCard.tight(
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => NoteEditorScreen(noteId: n.id))),
+                    child: Row(children: [
+                      Icon(Icons.sticky_note_2_outlined, color: t.secondary),
+                      const SizedBox(width: Space.md),
+                      Expanded(child: Text(n.title.isEmpty ? l.untitled : n.title, style: context.text.titleSmall)),
+                      Icon(Icons.chevron_right_rounded, color: t.faint),
+                    ]),
+                  ),
+                ),
+              AppCard.tight(
+                shadow: false,
+                color: t.accent5,
+                border: Border.all(color: t.accent12),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => NoteEditorScreen(eventId: widget.occurrence!.seriesId)),
+                ),
+                child: Row(children: [
+                  Icon(Icons.sticky_note_2_outlined, color: t.accent),
+                  const SizedBox(width: Space.md),
+                  Text(l.addNoteToEvent, style: context.text.titleSmall?.copyWith(color: t.accent)),
+                ]),
+              ),
             ],
             if (_error != null)
               Padding(
-                padding: const EdgeInsets.only(top: 12),
-                child: Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                padding: const EdgeInsets.only(top: Space.md),
+                child: Text(_error!, style: context.text.bodySmall?.copyWith(color: t.danger)),
               ),
           ],
         ),

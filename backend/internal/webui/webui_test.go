@@ -43,6 +43,21 @@ func TestHandler(t *testing.T) {
 	if ct := rec.Header().Get("Content-Type"); ct != "application/wasm" {
 		t.Errorf("wasm content type %q", ct)
 	}
+	// revalidation: same ETag → 304, and never a long max-age
+	req = httptest.NewRequest("GET", "/main.dart.js", nil)
+	rec = httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	etag := rec.Header().Get("ETag")
+	if etag == "" || rec.Header().Get("Cache-Control") != "no-cache" {
+		t.Fatalf("missing etag/no-cache: %v", rec.Header())
+	}
+	req = httptest.NewRequest("GET", "/main.dart.js", nil)
+	req.Header.Set("If-None-Match", etag)
+	rec = httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != http.StatusNotModified {
+		t.Errorf("want 304 on matching ETag, got %d", rec.Code)
+	}
 	if !Available(root) || Available(fstest.MapFS{}) {
 		t.Error("Available")
 	}

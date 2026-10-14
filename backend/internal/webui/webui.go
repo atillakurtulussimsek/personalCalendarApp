@@ -5,11 +5,14 @@
 package webui
 
 import (
+	"crypto/sha256"
 	"embed"
+	"encoding/hex"
 	"io/fs"
 	"net/http"
 	"path"
 	"strings"
+	"sync"
 )
 
 //go:embed all:dist
@@ -33,8 +36,15 @@ func Available(root fs.FS) bool {
 // Handler serves static files from root. Unknown paths that look like page
 // navigations fall back to index.html; everything else is passed to next
 // (the API's JSON 404).
+//
+// Flutter web asset names are not content-hashed (main.dart.js, fonts,
+// FontManifest.json…), so long cache lifetimes would mix files from different
+// deploys (e.g. a stale tree-shaken icon font). Every response is therefore
+// "no-cache" with a strong ETag: browsers revalidate and get a cheap 304 when
+// nothing changed.
 func Handler(root fs.FS, next http.Handler) http.Handler {
 	files := http.FileServer(http.FS(root))
+	etags := &etagCache{root: root, m: map[string]string{}}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet && r.Method != http.MethodHead {
 			next.ServeHTTP(w, r)
@@ -45,12 +55,12 @@ func Handler(root fs.FS, next http.Handler) http.Handler {
 			p = "index.html"
 		}
 		if info, err := fs.Stat(root, p); err == nil && !info.IsDir() {
-			setCacheHeaders(w, p)
+			setHeaders(w, p, etags.get(p))
 			files.ServeHTTP(w, r)
 			return
 		}
 		if strings.Contains(r.Header.Get("Accept"), "text/html") && path.Ext(p) == "" {
-			setCacheHeaders(w, "index.html")
+			setHeaders(w, "index.html", etags.get("index.html"))
 			r2 := r.Clone(r.Context())
 			r2.URL.Path = "/"
 			files.ServeHTTP(w, r2)
@@ -60,17 +70,36 @@ func Handler(root fs.FS, next http.Handler) http.Handler {
 	})
 }
 
-// Entry points and the service worker must always be revalidated so a deploy
-// is picked up immediately; hashed/static assets can be cached.
-func setCacheHeaders(w http.ResponseWriter, p string) {
-	switch p {
-	case "index.html", "flutter_bootstrap.js", "flutter_service_worker.js", "version.json", "manifest.json", "main.dart.js",
-		"drift_worker.js", "sqlite3.wasm":
-		w.Header().Set("Cache-Control", "no-cache")
-	default:
-		w.Header().Set("Cache-Control", "public, max-age=86400")
+func setHeaders(w http.ResponseWriter, p, etag string) {
+	w.Header().Set("Cache-Control", "no-cache")
+	if etag != "" {
+		// net/http's FileServer honours If-None-Match against this header (304)
+		w.Header().Set("ETag", etag)
 	}
 	if strings.HasSuffix(p, ".wasm") {
 		w.Header().Set("Content-Type", "application/wasm")
 	}
+}
+
+// etagCache hashes embedded files once (they never change at runtime).
+type etagCache struct {
+	root fs.FS
+	mu   sync.Mutex
+	m    map[string]string
+}
+
+func (c *etagCache) get(p string) string {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if e, ok := c.m[p]; ok {
+		return e
+	}
+	b, err := fs.ReadFile(c.root, p)
+	if err != nil {
+		return ""
+	}
+	sum := sha256.Sum256(b)
+	e := `"` + hex.EncodeToString(sum[:12]) + `"`
+	c.m[p] = e
+	return e
 }

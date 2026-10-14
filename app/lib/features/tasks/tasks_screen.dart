@@ -3,12 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/dates.dart';
+import '../../core/theme.dart';
+import '../../core/ui.dart';
+import '../capture/capture_sheet.dart';
+import '../home/shell_actions.dart';
 import '../../data/db/database.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers.dart';
 import '../notes/note_editor_screen.dart';
 
-/// To-do list: open tasks first (overdue highlighted), done tasks collapsible.
+/// To-do list: progress ring, then Overdue / Today / Later / Done groups.
 class TasksScreen extends ConsumerStatefulWidget {
   const TasksScreen({super.key});
 
@@ -24,63 +28,172 @@ class TasksScreenState extends ConsumerState<TasksScreen> {
   @override
   Widget build(BuildContext context) {
     final l = L10n.of(context);
-    final scheme = Theme.of(context).colorScheme;
+    final t = context.tokens;
     final tasks = ref.watch(tasksProvider).value ?? const <Task>[];
-    final open = tasks.where((t) => !t.done).toList();
-    final done = tasks.where((t) => t.done).toList();
     final now = DateTime.now();
-    if (tasks.isEmpty) {
-      return Center(child: Text(l.noTasks, style: TextStyle(color: scheme.outline)));
-    }
-    return ListView(
-      children: [
-        for (final t in open) _tile(context, t, now),
-        if (done.isNotEmpty)
-          ListTile(
-            leading: Icon(_showDone ? Icons.expand_less : Icons.expand_more),
-            title: Text('${_showDone ? l.hideDone : l.showDone} (${done.length})'),
-            onTap: () => setState(() => _showDone = !_showDone),
-          ),
-        if (_showDone) for (final t in done) _tile(context, t, now),
-      ],
-    );
-  }
+    final today = Dates.startOfDay(now);
+    final tomorrow = today.add(const Duration(days: 1));
+    final open = tasks.where((x) => !x.done).toList();
+    final overdue = open.where((x) => x.dueAt != null && x.dueAt!.toLocal().isBefore(today)).toList();
+    final dueToday = open.where((x) => x.dueAt != null && !x.dueAt!.toLocal().isBefore(today) && x.dueAt!.toLocal().isBefore(tomorrow)).toList();
+    final later = open.where((x) => x.dueAt == null || !x.dueAt!.toLocal().isBefore(tomorrow)).toList();
+    final done = tasks.where((x) => x.done).toList();
+    final doneToday = done.where((x) => x.dueAt != null && x.dueAt!.toLocal().isBefore(tomorrow) && Dates.sameDay(x.updatedAt, now)).toList();
 
-  Widget _tile(BuildContext context, Task t, DateTime now) {
-    final l = L10n.of(context);
-    final scheme = Theme.of(context).colorScheme;
-    final overdue = !t.done && t.dueAt != null && t.dueAt!.isBefore(now);
-    final repo = ref.read(taskRepositoryProvider);
-    return Dismissible(
-      key: ValueKey(t.id),
-      direction: DismissDirection.endToStart,
-      background: Container(color: scheme.errorContainer, alignment: Alignment.centerRight, padding: const EdgeInsets.only(right: 16), child: const Icon(Icons.delete_outline)),
-      onDismissed: (_) {
-        repo.remove(t.id);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l.taskDeleted)));
-      },
-      child: CheckboxListTile(
-        controlAffinity: ListTileControlAffinity.leading,
-        value: t.done,
-        onChanged: (v) => repo.setDone(t.id, v ?? false),
-        title: Text(t.title, style: t.done ? const TextStyle(decoration: TextDecoration.lineThrough) : null),
-        subtitle: t.dueAt == null && t.noteId == null
-            ? null
-            : Row(children: [
-                if (t.dueAt != null)
-                  Text(
-                    '${overdue ? '${l.overdue} · ' : ''}${Dates.dateTime.format(t.dueAt!.toLocal())}',
-                    style: TextStyle(color: overdue ? scheme.error : null),
-                  ),
-                if (t.noteId != null) ...[
-                  const SizedBox(width: 8),
+    // progress of what was on today's plate (overdue + due today + done today)
+    final planned = overdue.length + dueToday.length + doneToday.length;
+    final remaining = overdue.length + dueToday.length;
+    final progressTitle = planned == 0
+        ? l.tasksNoneToday
+        : remaining == 0
+            ? l.tasksAllDone
+            : doneToday.isEmpty
+                ? l.tasksStart
+                : l.tasksGoingWell;
+    final progressSub = [
+      if (remaining > 0) l.tasksRemaining(remaining),
+      if (overdue.isNotEmpty) l.overdueCount(overdue.length),
+    ].join(' · ');
+
+    Widget group(List<Task> items) => AppCard(
+          padding: const EdgeInsets.symmetric(horizontal: Space.sm, vertical: Space.xs),
+          radius: Radii.lg,
+          child: Column(children: [
+            for (var i = 0; i < items.length; i++) ...[
+              if (i > 0) const Divider(indent: 52),
+              _TaskTile(items[i], now: now),
+            ],
+          ]),
+        );
+
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      PageHeader(title: l.tabTasks, trailing: const ShellActions()),
+      Expanded(
+        child: tasks.isEmpty || (open.isEmpty && !_showDone && done.isEmpty)
+            ? EmptyState(
+                icon: Icons.check_circle_outline_rounded,
+                title: l.emptyTasksTitle,
+                message: l.emptyTasksBody,
+                examples: [l.exampleTask1, l.exampleTask2],
+                onExample: (e) => showCaptureSheet(context, initialText: e, target: CaptureTarget.task),
+              )
+            : ListView(padding: const EdgeInsets.fromLTRB(Space.lg, 0, Space.lg, Space.lg), children: [
+                AppCard(
+                  child: Row(children: [
+                    ProgressRing(value: planned == 0 ? 1 : doneToday.length / planned, label: '${doneToday.length}/$planned'),
+                    const SizedBox(width: Space.lg),
+                    Expanded(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text(progressTitle, style: context.text.titleLarge),
+                        if (progressSub.isNotEmpty) Text(progressSub, style: context.text.bodySmall),
+                      ]),
+                    ),
+                  ]),
+                ),
+                const SizedBox(height: Space.xl),
+                if (overdue.isNotEmpty) ...[
+                  SectionHeader(l.overdue, icon: Icons.flag_outlined, color: t.danger, small: true),
+                  group(overdue),
+                  const SizedBox(height: Space.xl),
+                ],
+                if (dueToday.isNotEmpty || doneToday.isNotEmpty) ...[
+                  SectionHeader(l.today, small: true),
+                  group([...dueToday, ...doneToday]),
+                  const SizedBox(height: Space.xl),
+                ],
+                if (later.isNotEmpty) ...[
+                  SectionHeader(l.later, small: true),
+                  group(later),
+                  const SizedBox(height: Space.xl),
+                ],
+                if (done.length > doneToday.length) ...[
                   InkWell(
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => NoteEditorScreen(noteId: t.noteId))),
-                    child: Icon(Icons.notes, size: 16, color: scheme.primary),
+                    borderRadius: BorderRadius.circular(Radii.md),
+                    onTap: () => setState(() => _showDone = !_showDone),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: Space.sm),
+                      child: Row(children: [
+                        Icon(_showDone ? Icons.expand_less_rounded : Icons.expand_more_rounded, size: 20, color: t.secondary),
+                        const SizedBox(width: Space.sm),
+                        Text('${l.doneSection} · ${done.length - doneToday.length}', style: context.text.bodySmall),
+                      ]),
+                    ),
                   ),
+                  if (_showDone) ...[
+                    const SizedBox(height: Space.sm),
+                    group(done.where((x) => !doneToday.contains(x)).toList()),
+                  ],
                 ],
               ]),
-        secondary: IconButton(icon: const Icon(Icons.edit_outlined, size: 20), onPressed: () => showTaskSheet(context, ref, task: t)),
+      ),
+    ]);
+  }
+}
+
+class _TaskTile extends ConsumerWidget {
+  const _TaskTile(this.task, {required this.now});
+  final Task task;
+  final DateTime now;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = L10n.of(context);
+    final t = context.tokens;
+    final repo = ref.read(taskRepositoryProvider);
+    final overdue = !task.done && task.dueAt != null && task.dueAt!.isBefore(now);
+    final linkedNote = task.noteId == null ? null : ref.watch(notesProvider).value?.where((n) => n.id == task.noteId).firstOrNull;
+    final meta = [
+      if (task.dueAt != null)
+        Dates.sameDay(task.dueAt!, now) ? Dates.time.format(task.dueAt!.toLocal()) : Dates.dateTime.format(task.dueAt!.toLocal()),
+    ];
+    return Dismissible(
+      key: ValueKey(task.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: Space.lg),
+        child: Icon(Icons.delete_outline_rounded, color: t.danger),
+      ),
+      onDismissed: (_) {
+        repo.remove(task.id);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l.taskDeleted)));
+      },
+      child: InkWell(
+        borderRadius: BorderRadius.circular(Radii.md),
+        onTap: () => showTaskSheet(context, ref, task: task),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: Space.xs),
+          child: Row(children: [
+            PopCheck(value: task.done, danger: overdue, onChanged: (v) => repo.setDone(task.id, v)),
+            const SizedBox(width: Space.xs),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(task.title,
+                    style: task.done
+                        ? context.text.bodyLarge?.copyWith(color: t.faint, decoration: TextDecoration.lineThrough)
+                        : context.text.bodyLarge?.copyWith(color: t.ink)),
+                if (meta.isNotEmpty || linkedNote != null)
+                  Text.rich(
+                    TextSpan(children: [
+                      if (meta.isNotEmpty) TextSpan(text: meta.first, style: TextStyle(color: overdue ? t.danger : null)),
+                      if (meta.isNotEmpty && linkedNote != null) const TextSpan(text: ' · '),
+                      if (linkedNote != null)
+                        TextSpan(
+                          text: linkedNote.title.isEmpty ? l.untitled : linkedNote.title,
+                          style: TextStyle(color: t.accent, fontWeight: FontWeight.w600),
+                        ),
+                    ]),
+                    style: context.text.bodySmall?.copyWith(fontFeatures: tabularFigures),
+                  ),
+              ]),
+            ),
+            if (linkedNote != null)
+              IconButton(
+                icon: Icon(Icons.sticky_note_2_outlined, size: 20, color: t.secondary),
+                onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => NoteEditorScreen(noteId: linkedNote.id))),
+              ),
+          ]),
+        ),
       ),
     );
   }
