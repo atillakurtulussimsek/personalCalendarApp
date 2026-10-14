@@ -1,4 +1,4 @@
-# Dokploy-ready compose: API + MySQL 8.4 with a persistent volume.
+# Dokploy-ready compose: API + web UI, MySQL 8.4 with a persistent volume, nightly backups.
 # Set the secrets in Dokploy's environment panel (or a .env next to this file).
 services:
   db:
@@ -19,7 +19,10 @@ services:
       retries: 10
 
   api:
-    build: .
+    # API + web UI in one image (Dockerfile at the repository root)
+    build:
+      context: ..
+      dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
       db:

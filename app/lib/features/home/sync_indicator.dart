@@ -23,7 +23,7 @@ class SyncIndicator extends ConsumerWidget {
           : (Icons.cloud_done_outlined, l.syncStatusSynced, scheme.outline),
     };
     return IconButton(
-      tooltip: '$label · ${l.syncNow}',
+      tooltip: [label, if (status.error != null) status.error!, l.syncNow].join(' · '),
       icon: Badge(
         isLabelVisible: status.pending > 0 && status.phase != SyncPhase.syncing,
         label: Text('${status.pending}'),

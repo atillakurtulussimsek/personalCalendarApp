@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:workmanager/workmanager.dart';
@@ -8,6 +7,7 @@ import '../data/api/sync_api.dart';
 import '../data/api/token_store.dart';
 import '../data/db/database.dart';
 import '../data/sync/sync_service.dart';
+import '../core/platform_info.dart';
 
 const backgroundSyncTask = 'personal_calendar.sync';
 
@@ -48,7 +48,7 @@ void backgroundSyncDispatcher() {
 
 /// Registers the periodic background sync (Android only; 15 min is the OS minimum).
 class BackgroundSync {
-  static bool get supported => Platform.isAndroid;
+  static bool get supported => PlatformInfo.isAndroid;
 
   static Future<void> register() async {
     if (!supported) return;

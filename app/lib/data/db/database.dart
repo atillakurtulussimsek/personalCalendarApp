@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
-import 'package:drift_flutter/drift_flutter.dart';
+import 'connection_native.dart' if (dart.library.js_interop) 'connection_web.dart';
 
 import 'tables.dart';
 
@@ -14,11 +14,8 @@ const kLastSyncAt = 'last_sync_at';
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
-  AppDatabase.open()
-      : super(driftDatabase(
-          name: 'personal_calendar',
-          native: const DriftNativeOptions(shareAcrossIsolates: true),
-        ));
+  /// Opens the on-device database (SQLite file natively, WebAssembly SQLite on the web).
+  AppDatabase.open() : super(openConnection('personal_calendar'));
 
   @override
   int get schemaVersion => 3;

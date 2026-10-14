@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -8,6 +7,7 @@ import '../data/api/api_client.dart';
 import '../data/api/token_store.dart';
 import '../data/sync/sync_service.dart';
 import 'background_sync.dart';
+import '../core/platform_info.dart';
 
 /// Firebase Cloud Messaging on Android: receives silent "sync" data messages.
 ///
@@ -27,7 +27,7 @@ class PushService {
   static const _projectId = String.fromEnvironment('FIREBASE_PROJECT_ID');
 
   static bool get configured => _apiKey.isNotEmpty && _appId.isNotEmpty && _senderId.isNotEmpty && _projectId.isNotEmpty;
-  static bool get supported => Platform.isAndroid && configured;
+  static bool get supported => PlatformInfo.isAndroid && configured;
 
   static FirebaseOptions get options => const FirebaseOptions(apiKey: _apiKey, appId: _appId, messagingSenderId: _senderId, projectId: _projectId);
 

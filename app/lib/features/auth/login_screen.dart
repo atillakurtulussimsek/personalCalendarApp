@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/platform_info.dart';
 import '../../data/api/api_client.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers.dart';
@@ -24,9 +25,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    ref.read(authRepositoryProvider).serverUrl.then((v) {
-      if (mounted && v.isNotEmpty) _server.text = v;
-    });
+    // On the web the UI is served by the API itself: always talk to this origin.
+    if (PlatformInfo.isWeb) {
+      _server.text = Uri.base.origin;
+    } else {
+      ref.read(authRepositoryProvider).serverUrl.then((v) {
+        if (mounted && v.isNotEmpty) _server.text = v;
+      });
+    }
   }
 
   @override
@@ -47,7 +53,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     try {
       final session = ref.read(sessionProvider.notifier);
       if (_register) {
-        await session.register(_server.text, _email.text.trim(), _password.text);
+        await session.register(
+          _server.text,
+          _email.text.trim(),
+          _password.text,
+        );
       } else {
         await session.login(_server.text, _email.text.trim(), _password.text);
       }
@@ -78,25 +88,41 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Icon(Icons.calendar_month, size: 64, color: Theme.of(context).colorScheme.primary),
-                    const SizedBox(height: 8),
-                    Text(l.appTitle, textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
-                    const SizedBox(height: 24),
-                    TextFormField(
-                      controller: _server,
-                      decoration: InputDecoration(labelText: l.serverUrl, hintText: l.serverUrlHint),
-                      keyboardType: TextInputType.url,
-                      autocorrect: false,
-                      validator: (v) => (v == null || v.trim().isEmpty) ? l.serverUrlHint : null,
+                    Icon(
+                      Icons.calendar_month,
+                      size: 64,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
+                    Text(
+                      l.appTitle,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                    const SizedBox(height: 24),
+                    if (!PlatformInfo.isWeb)
+                      TextFormField(
+                        controller: _server,
+                        decoration: InputDecoration(
+                          labelText: l.serverUrl,
+                          hintText: l.serverUrlHint,
+                        ),
+                        keyboardType: TextInputType.url,
+                        autocorrect: false,
+                        validator: (v) => (v == null || v.trim().isEmpty)
+                            ? l.serverUrlHint
+                            : null,
+                      ),
+                    if (!PlatformInfo.isWeb) const SizedBox(height: 12),
                     TextFormField(
                       controller: _email,
                       decoration: InputDecoration(labelText: l.email),
                       keyboardType: TextInputType.emailAddress,
                       autofillHints: const [AutofillHints.email],
                       autocorrect: false,
-                      validator: (v) => (v == null || !v.contains('@')) ? l.invalidEmail : null,
+                      validator: (v) => (v == null || !v.contains('@'))
+                          ? l.invalidEmail
+                          : null,
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
@@ -105,23 +131,38 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       obscureText: true,
                       autofillHints: const [AutofillHints.password],
                       onFieldSubmitted: (_) => _submit(),
-                      validator: (v) => (v == null || v.length < 8) ? l.passwordTooShort : null,
+                      validator: (v) => (v == null || v.length < 8)
+                          ? l.passwordTooShort
+                          : null,
                     ),
                     const SizedBox(height: 20),
                     if (_error != null)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 12),
-                        child: Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                        child: Text(
+                          _error!,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
                       ),
                     FilledButton(
                       onPressed: _busy ? null : _submit,
                       child: _busy
-                          ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
                           : Text(_register ? l.register : l.login),
                     ),
                     TextButton(
-                      onPressed: _busy ? null : () => setState(() => _register = !_register),
-                      child: Text(_register ? l.haveAccountLogin : l.noAccountRegister),
+                      onPressed: _busy
+                          ? null
+                          : () => setState(() => _register = !_register),
+                      child: Text(
+                        _register ? l.haveAccountLogin : l.noAccountRegister,
+                      ),
                     ),
                   ],
                 ),

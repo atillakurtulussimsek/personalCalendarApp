@@ -25,6 +25,7 @@ import (
 	"github.com/atillasimsek/personal-calendar/backend/internal/migrations"
 	"github.com/atillasimsek/personal-calendar/backend/internal/notify"
 	"github.com/atillasimsek/personal-calendar/backend/internal/store"
+	"github.com/atillasimsek/personal-calendar/backend/internal/webui"
 )
 
 // OpenDB opens a MySQL pool from a DSN (user:pass@tcp(host:3306)/db) and
@@ -139,6 +140,13 @@ func NewRouter(cfg config.Config, st *store.Store, hub *notify.Hub) http.Handler
 	h.Hub = hub
 	h.AuthLimiter = httprate.LimitBy(20, time.Minute, keyByClientIP) // stricter limit on credential endpoints
 	h.Mount(r)
+
+	// Everything that is not an API route: the embedded Flutter web app (if built).
+	if root := webui.Dist(); webui.Available(root) {
+		notFound := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { httpx.WriteError(w, httpx.NotFound("route not found")) })
+		r.Handle("/*", webui.Handler(root, notFound))
+		slog.Info("web ui enabled")
+	}
 	return r
 }
 

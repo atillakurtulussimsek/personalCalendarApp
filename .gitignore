@@ -17,3 +17,11 @@ app/.packages
 .DS_Store
 .idea/
 .vscode/
+
+# Flutter web runtime fetched by app/tool/fetch_web_assets.sh
+app/web/sqlite3.wasm*
+app/web/drift_worker.js*
+
+# Web UI embedded into the Go binary (built by `make build`)
+backend/internal/webui/dist/*
+!backend/internal/webui/dist/.keep

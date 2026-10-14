@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'token_store.dart';
 
@@ -45,7 +46,7 @@ class ApiClient {
 
   Future<void>? _refreshing;
 
-  Future<String> get baseUrl async => (await tokens.read(TokenStore.serverUrl)) ?? 'http://localhost:8080';
+  Future<String> get baseUrl async => (await tokens.read(TokenStore.serverUrl)) ?? (kIsWeb ? Uri.base.origin : 'http://localhost:8080');
 
   Future<Map<String, dynamic>> request(
     String method,

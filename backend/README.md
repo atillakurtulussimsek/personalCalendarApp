@@ -45,12 +45,24 @@ internal/server      router, middleware, DB open/migrate
 internal/httpx       JSON + error envelope helpers
 ```
 
+## Web UI
+
+The Flutter web app is embedded into the binary (`internal/webui`) and served on the same
+port as the API: open `https://<your-domain>/` and log in — no server address is asked on
+the web. Build both in one go from the repository root:
+
+```bash
+make build        # app web build → backend/internal/webui/dist → backend/bin/api
+```
+
+Without a web build (`make api` / `go build`) the binary runs API-only.
+
 ## Deploy to Dokploy
 
 1. Create a **Compose** service pointing at this repository, compose path `backend/docker-compose.yml`.
 2. Set environment variables: `JWT_SECRET`, `MYSQL_PASSWORD`, `MYSQL_ROOT_PASSWORD`
    (optionally `ALLOW_REGISTRATION=false` after your account exists, `CORS_ORIGINS`, `API_PORT`).
-3. Add a domain to the `api` service on port 8080; Dokploy's Traefik terminates HTTPS
+3. Add a domain to the `api` service on port 8080 (the same domain serves the web UI); Dokploy's Traefik terminates HTTPS
    (`TRUSTED_PROXIES=1` is the compose default so rate limiting sees real client IPs).
 4. Deploy. The API applies migrations on boot. The MySQL data lives in the `mysql-data` volume.
 

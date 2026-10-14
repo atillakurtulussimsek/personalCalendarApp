@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,6 +18,7 @@ import '../calendar/calendars_screen.dart';
 import '../notes/note_editor_screen.dart';
 import '../notes/notes_screen.dart';
 import 'sync_indicator.dart';
+import '../../core/platform_info.dart';
 
 /// Root scaffold: bottom navigation on Android, navigation rail on macOS.
 class HomeShell extends ConsumerStatefulWidget {
@@ -118,7 +118,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     final db = ref.read(databaseProvider);
     if (await db.getState(SettingKeys.permissionsAsked) == 'true') return;
     await db.setState(SettingKeys.permissionsAsked, 'true');
-    if (!mounted || !(Platform.isAndroid || Platform.isMacOS)) return;
+    if (!mounted || !(PlatformInfo.isAndroid || PlatformInfo.isMacOS)) return;
     final l = L10n.of(context);
     final ok = await showDialog<bool>(
       context: context,
@@ -151,7 +151,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
   @override
   Widget build(BuildContext context) {
     final l = L10n.of(context);
-    final wide = Platform.isMacOS || MediaQuery.sizeOf(context).width >= 700;
+    final wide = PlatformInfo.isMacOS || MediaQuery.sizeOf(context).width >= 700;
     final pages = [
       CalendarScreen(key: _calendarKey),
       NotesScreen(key: _notesKey),

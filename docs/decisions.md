@@ -186,3 +186,24 @@ volume with 14-day retention. No cron daemon in the API image; the loop script i
 Imported files are parsed on the device (`core/ics.dart`) and created as ordinary events so
 they flow through the outbox like manual entries. Exceptions (RECURRENCE-ID) in imported
 files are ignored for now.
+
+## 2026-10-14 — Web UI embedded into the API binary
+
+**Decision:** The Flutter web build is embedded with `go:embed` (`backend/internal/webui`) and
+served on the API port; non-API GETs fall back to `index.html`. One root `Dockerfile`
+(Flutter stage → Go stage → distroless) and one `make build` produce everything.
+
+**Rationale:** Single deploy unit on Dokploy, same origin (no CORS, no server URL prompt on
+the web), and the UI version always matches the API version.
+
+## 2026-10-14 — drift web storage fallback
+
+Some browsers (and embedded webviews) advertise SharedWorker but block its network access,
+so loading `sqlite3.wasm` inside the worker fails. `connection_web.dart` probes each
+worker-based storage with a throwaway database and falls back to `unsafeIndexedDb`
+(single-tab, persistent). `drift_worker.js` is compiled from our own lockfile instead of
+downloading the release build, so worker and wasm versions always match.
+
+## 2026-10-14 — connectivity_plus pinned to 6.x
+
+7.x uses `NWPath.isUltraConstrained`, absent from the Xcode 16.4 macOS SDK.

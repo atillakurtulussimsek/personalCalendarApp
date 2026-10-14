@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 
 import '../api/api_client.dart';
 import '../api/sync_api.dart';
@@ -104,7 +105,8 @@ class SyncService {
       _status = _status.copyWith(phase: e.isAuthError ? SyncPhase.unauthenticated : SyncPhase.error, error: e.message);
       _emit();
       return SyncResult(error: e);
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('sync failed: $e\n$st');
       _status = _status.copyWith(phase: SyncPhase.error, error: e.toString());
       _emit();
       return SyncResult(error: e);

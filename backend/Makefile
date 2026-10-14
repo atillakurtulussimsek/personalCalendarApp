@@ -28,4 +28,4 @@ tidy:
 	go mod tidy
 
 docker:
-	docker compose up --build
+	docker compose up --build   # builds the root Dockerfile (API + web UI)

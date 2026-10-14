@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:quick_actions/quick_actions.dart';
+import '../core/platform_info.dart';
 
 /// Something outside the UI asked the app to do: share sheet, widget,
 /// Quick Settings tile, notification action, app shortcut, tray, hotkey, URL.
@@ -84,7 +84,7 @@ class AppIntents {
       // platform without the native bridge (tests)
     }
 
-    if (Platform.isAndroid) {
+    if (PlatformInfo.isAndroid) {
       // home screen widget taps
       try {
         final launch = await HomeWidget.initiallyLaunchedFromHomeWidget();
@@ -114,7 +114,7 @@ class AppIntents {
 
   /// Android: toggles the persistent "quick note" notification.
   Future<void> setCaptureNotification(bool enabled) async {
-    if (!Platform.isAndroid) return;
+    if (!PlatformInfo.isAndroid) return;
     try {
       await _channel.invokeMethod('setCaptureNotification', {'enabled': enabled});
     } on MissingPluginException {

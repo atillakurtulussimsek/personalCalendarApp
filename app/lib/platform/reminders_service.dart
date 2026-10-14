@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -10,6 +9,7 @@ import '../core/tz.dart';
 import '../data/repositories/repositories.dart';
 import '../data/sync/mappers.dart';
 import 'app_intents.dart';
+import '../core/platform_info.dart';
 
 /// Schedules local reminder notifications for upcoming occurrences and keeps
 /// them in sync with the database (works fully offline).
@@ -35,7 +35,7 @@ class RemindersService {
   bool _initialized = false;
   bool _exactAllowed = false;
 
-  bool get supported => Platform.isAndroid || Platform.isMacOS;
+  bool get supported => PlatformInfo.isAndroid || PlatformInfo.isMacOS;
   bool get exactAllowed => _exactAllowed;
 
   Future<void> init() async {
@@ -51,7 +51,7 @@ class RemindersService {
         if (id != null && id.isNotEmpty) AppIntents.instance.emit(AppIntent(AppIntentType.openEvent, text: id));
       },
     );
-    if (Platform.isAndroid) {
+    if (PlatformInfo.isAndroid) {
       final android = plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
       _exactAllowed = await android?.canScheduleExactNotifications() ?? false;
     } else {
@@ -63,7 +63,7 @@ class RemindersService {
   Future<bool> requestPermissions({bool exact = true}) async {
     if (!supported) return false;
     await init();
-    if (Platform.isAndroid) {
+    if (PlatformInfo.isAndroid) {
       final android = plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
       final granted = await android?.requestNotificationsPermission() ?? false;
       if (exact) {

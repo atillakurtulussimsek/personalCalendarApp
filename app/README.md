@@ -15,6 +15,15 @@ On first launch enter the server URL (e.g. `http://localhost:8080` on macOS,
 `http://10.0.2.2:8080` from the Android emulator), then register or log in.
 Debug Android builds allow plain `http://`; release builds are HTTPS only.
 
+## Web
+
+`make build` at the repository root builds the web app and embeds it into the API binary.
+The web runtime for drift (`web/sqlite3.wasm`, `web/drift_worker.js`) is prepared by
+`tool/fetch_web_assets.sh` (wasm pinned to `pubspec.lock`, worker compiled locally).
+`lib/data/db/connection_web.dart` verifies the best storage (shared worker + IndexedDB/OPFS)
+and falls back to in-tab IndexedDB when the browser cannot run it. On the web the server
+address is the page origin; native-only features (widgets, tray, reminders, push) are off.
+
 ## Test & lint
 
 ```bash

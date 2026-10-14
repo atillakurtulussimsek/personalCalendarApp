@@ -5,7 +5,7 @@ sunucunuzda çalışan Go API (Dokploy ile dağıtım), çevrimdışı öncelikl
 
 ```
 backend/   Go API           → backend/README.md (çalıştırma, test, Dokploy)
-app/       Flutter uygulaması (Faz 2)
+app/       Flutter uygulaması (Android, macOS, web)
 docs/      mimari, API (OpenAPI), karar günlüğü
 ```
 
@@ -22,9 +22,19 @@ docs/      mimari, API (OpenAPI), karar günlüğü
 
 ## Build
 
+Tek komut, API + web arayüzü tek binary'de:
+
 ```bash
-cd app && flutter build apk --release        # Android
-cd app && flutter build macos --release      # macOS (Xcode + CocoaPods gerekir)
+make build            # → backend/bin/api  (http://sunucu:8080/ web arayüzü, aynı porttan API)
+make run              # build + çalıştır (backend/.env okunur)
+docker build -t personal-calendar .   # aynısı, container olarak
+```
+
+Yerel istemciler:
+
+```bash
+make apk              # Android
+make macos            # macOS (Xcode + CocoaPods gerekir)
 ```
 
 Dokploy'a dağıtım: [backend/README.md](backend/README.md#deploy-to-dokploy).

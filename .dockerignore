@@ -1,0 +1,14 @@
+.git
+**/.DS_Store
+**/.env
+backend/bin
+backend/internal/webui/dist/*
+!backend/internal/webui/dist/.keep
+app/build
+app/.dart_tool
+app/android/.gradle
+app/android/app/build
+app/macos/Pods
+app/macos/Flutter/ephemeral
+app/web/sqlite3.wasm
+app/web/drift_worker.js

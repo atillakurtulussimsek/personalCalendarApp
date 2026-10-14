@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart' show ThemeMode;
@@ -21,6 +20,7 @@ import 'platform/live_sync.dart';
 import 'platform/push_service.dart';
 import 'platform/reminders_service.dart';
 import 'platform/widget_publisher.dart';
+import 'core/platform_info.dart';
 
 /// Overridden in tests with in-memory implementations.
 final databaseProvider = Provider<AppDatabase>((ref) {
@@ -154,7 +154,7 @@ class SyncTriggers with WidgetsBindingObserver {
       sync.sync();
       ics.refreshStale();
       live.start();
-    } else if (state == AppLifecycleState.paused && Platform.isAndroid) {
+    } else if (state == AppLifecycleState.paused && PlatformInfo.isAndroid) {
       // Android: no socket in the background (Doze would kill it); FCM/WorkManager take over
       live.stop();
     }

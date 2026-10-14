@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
@@ -14,6 +13,7 @@ import '../../platform/app_intents.dart';
 import '../../platform/desktop_integration.dart';
 import '../../platform/live_sync.dart';
 import '../../providers.dart';
+import '../../core/platform_info.dart';
 
 /// Keys in the sync_state kv table used for device-local settings.
 class SettingKeys {
@@ -131,7 +131,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       body: ListView(
         children: [
           ListTile(leading: const Icon(Icons.person_outline), title: Text(l.settingsAccount), subtitle: Text(_email)),
-          ListTile(leading: const Icon(Icons.dns_outlined), title: Text(l.settingsServer), subtitle: Text(_server)),
+          if (!PlatformInfo.isWeb) ListTile(leading: const Icon(Icons.dns_outlined), title: Text(l.settingsServer), subtitle: Text(_server)),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.palette_outlined),
@@ -171,7 +171,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               if (mounted) setState(() {});
             },
           ),
-          if (Platform.isAndroid) ...[
+          if (PlatformInfo.isAndroid) ...[
             ListTile(
               leading: Icon(ref.read(remindersServiceProvider).exactAllowed ? Icons.alarm_on : Icons.alarm_off),
               title: Text(l.settingsExactAlarm),
@@ -195,7 +195,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 '${l.settingsLiveSyncHint} · ${ref.watch(liveStateProvider).value == LiveState.connected ? l.liveStatusConnected : l.liveStatusDisconnected}'),
           ),
           const Divider(),
-          if (Platform.isAndroid)
+          if (PlatformInfo.isAndroid)
             SwitchListTile(
               secondary: const Icon(Icons.notifications_active_outlined),
               title: Text(l.settingsCaptureNotification),
@@ -207,7 +207,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 await AppIntents.instance.setCaptureNotification(v);
               },
             ),
-          if (Platform.isMacOS) ...[
+          if (PlatformInfo.isMacOS) ...[
             ListTile(
               leading: const Icon(Icons.keyboard_outlined),
               title: Text(l.settingsHotkey),

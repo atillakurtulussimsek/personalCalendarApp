@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:hotkey_manager/hotkey_manager.dart';
@@ -11,6 +10,7 @@ import '../core/dates.dart';
 import '../core/recurrence.dart';
 import '../data/repositories/repositories.dart';
 import 'app_intents.dart';
+import '../core/platform_info.dart';
 
 // ignore_for_file: deprecated_member_use
 
@@ -24,7 +24,7 @@ class DesktopIntegration with TrayListener, WindowListener {
   final DesktopLabels labels;
 
   static const _macos = MethodChannel('personal_calendar/macos');
-  static bool get supported => Platform.isMacOS;
+  static bool get supported => PlatformInfo.isMacOS;
 
   StreamSubscription<List<Occurrence>>? _sub;
   HotKey? _hotKey;

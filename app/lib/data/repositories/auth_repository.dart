@@ -1,10 +1,10 @@
-import 'dart:io';
 
 import 'package:uuid/uuid.dart';
 
 import '../api/auth_api.dart';
 import '../api/token_store.dart';
 import '../db/database.dart';
+import '../../core/platform_info.dart';
 
 /// Login/register/logout plus persisted session state.
 class AuthRepository {
@@ -18,7 +18,7 @@ class AuthRepository {
 
   Future<String?> get email => tokens.read(TokenStore.userEmail);
 
-  Future<String> get serverUrl async => (await tokens.read(TokenStore.serverUrl)) ?? '';
+  Future<String> get serverUrl async => (await tokens.read(TokenStore.serverUrl)) ?? (PlatformInfo.isWeb ? Uri.base.origin : '');
 
   Future<String> deviceId() async {
     var id = await tokens.read(TokenStore.deviceId);
@@ -29,7 +29,7 @@ class AuthRepository {
     return id;
   }
 
-  String get platform => Platform.isAndroid ? 'android' : (Platform.isMacOS ? 'macos' : 'other');
+  String get platform => PlatformInfo.name;
 
   Future<void> _prepare(String serverUrl) async {
     var url = serverUrl.trim();

@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:home_widget/home_widget.dart';
 
 import '../core/dates.dart';
 import '../core/recurrence.dart';
 import '../data/repositories/repositories.dart';
+import '../core/platform_info.dart';
 
 /// Keeps the Android home-screen widget's "today" list current.
 class WidgetPublisher {
@@ -19,7 +19,7 @@ class WidgetPublisher {
   static const androidProvider = 'AgendaWidgetProvider';
 
   void start() {
-    if (!Platform.isAndroid) return;
+    if (!PlatformInfo.isAndroid) return;
     _listen();
     _scheduleMidnight();
   }
